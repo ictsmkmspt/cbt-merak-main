@@ -1,0 +1,31 @@
+# <IfModule mod_setenvif.c>
+
+# SetEnvIfNoCase User-Agent .*merak47.* allowed_user_agents
+# # SetEnvIfNoCase User-Agent .*bing.* allowed_user_agents
+
+# Order Allow,Deny
+# <FilesMatch "^(sitemap_index\.xml)$">
+# Deny from all
+# Allow from env=allowed_user_agents
+# </FilesMatch>
+
+# </IfModule>
+<IfModule mod_rewrite.c>
+<IfModule mod_negotiation.c>
+        Options -MultiViews
+</IfModule>
+    RewriteEngine On
+    # RewriteCond %{HTTPS} off
+    # RewriteRule ^(.*)$ https://192.168.8.25/$1 [L,R=301]
+   
+    #RewriteCond %{HTTP_USER_AGENT} !(merak47)
+    #RewriteRule ^(.*)/$ /$1 [L,R=301]
+    
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)/$ /$1 [L,R=301]
+    # Handle Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>

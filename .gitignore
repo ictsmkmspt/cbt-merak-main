@@ -1,0 +1,10 @@
+protected/.env
+protected/vendor/
+protected/node_modules/
+protected/storage/logs/
+protected/storage/framework/cache/
+protected/storage/framework/sessions/
+protected/storage/framework/views/
+protected/bootstrap/cache/
+*.DS_Store
+*.sql
