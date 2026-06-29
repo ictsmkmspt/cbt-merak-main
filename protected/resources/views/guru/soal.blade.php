@@ -317,11 +317,11 @@
             <tr>
               <th style="width: 50px">#</th>
               <th style="text-align: center;">ID <small>Soal</small></th>
+              <th>Materi</th>
               <th>Paket <small>Soal</small></th>
               <th>Deskripsi</th>
               <th>KKM</th>
               <th>Waktu</th>
-              <th>Materi</th>
               <th>Tgl Dibuat</th>
               <th style="width: 160px; text-align: center;">Aksi</th>
             </tr>
@@ -348,11 +348,11 @@
             <tr>
               <td>{{ $no++ }}</td>
               <td style="text-align: center;">{{ $soal->id }}</td>
+              <td>{!! $materi_label !!}</td>
               <td>{{ $soal->paket }}</td>
               <td>{{ $soal->deskripsi }}</td>
               <td>{{ $soal->kkm }}</td>
               <td>{{ $soal->waktu/60 }} menit</td>
-              <td>{!! $materi_label !!}</td>
               <td>{{ $tanggal }}</td>
               <td style="text-align: center;">
                 <a href="{{ url('/edit-soal/'.$soal->id) }}" class="btn btn-xs btn-success" data-toggle='tooltip' title="Ubah Soal"><i class="fa fa-pencil-square-o"></i></a>
