@@ -109,6 +109,7 @@
                 <li <?php if ($url == 'data-siswa' or $url == 'detail-kelas-siswa') { echo "class='active'"; } ?>><a href="{{ url('/data-siswa') }}"><i class="fa fa-user"></i> Siswa</a></li>
                 @if(Auth::user()->status=="A")
                 <li <?php if ($url == 'iuran-siswa' or $url == 'iuran-bykelas') { echo "class='active'"; } ?>><a href="{{ url('/iuran-siswa') }}"><i class="fa fa-shopping-bag"></i> Iuran</a></li>
+                <li <?php if ($url == 'mapel') { echo "class='active'"; } ?>><a href="{{ url('/mapel') }}"><i class="fa fa-book"></i> Mata Pelajaran</a></li>
                 @endif
                 
               </ul>

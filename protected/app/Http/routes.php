@@ -176,3 +176,12 @@ Route::post('/get-materi', 'MateriController@get_materi');
 
 // Route countexamtime
 Route::post('/countexamtime', 'SiswaController@countexamtime');
+
+// Route AJAX refresh panel aktifitas
+Route::get('/ajax/get-aktifitas', 'GuruController@get_aktifitas_ajax');
+
+// ===== MATA PELAJARAN (Admin only) =====
+Route::get('/mapel', 'MapelController@index');
+Route::post('/mapel/tambah', 'MapelController@tambah');
+Route::post('/mapel/ubah', 'MapelController@ubah');
+Route::post('/mapel/hapus', 'MapelController@hapus');
