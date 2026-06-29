@@ -32,16 +32,13 @@ class MateriController extends Controller
     if (Auth::user()->status == "G" or Auth::user()->status == "A") {
       $school = School::first();
       $user = User::where('id', '=', Auth::user()->id)->first();
-      $aktifitas = Aktifitas::join('users', 'aktifitas.id_user', '=', 'users.id')
-                              ->select('users.nama as nama_user', 'users.gambar', 'aktifitas.*')
-                              ->orderby('aktifitas.id', 'desc')->limit(5)->get();
       $materis = Materi::leftJoin('kelas', 'materis.id_kelas', '=', 'kelas.id')
                        ->select('materis.*', 'kelas.nama as nama_kelas')
                        ->where('materis.id_user', Auth::user()->id)
                        ->paginate(15);
       // Daftar semua kelas untuk dropdown filter
       $kelass = Kelas::orderBy('nama')->get();
-      return view('guru.materi', compact('materis', 'user', 'aktifitas', 'school', 'kelass'));
+      return view('guru.materi', compact('materis', 'user', 'school', 'kelass'));
     }else{
       return redirect('siswa');
     }
@@ -52,12 +49,9 @@ class MateriController extends Controller
     if (Auth::user()->status == "G" or Auth::user()->status == "A") {
       $school = School::first();
       $user = User::where('id', '=', Auth::user()->id)->first();
-      $aktifitas = Aktifitas::join('users', 'aktifitas.id_user', '=', 'users.id')
-                              ->select('users.nama as nama_user', 'users.gambar', 'aktifitas.*')
-                              ->orderby('aktifitas.id', 'desc')->limit(5)->get();
       $materi = Materi::where('id', $id)->first();
       $kelass = Kelas::orderBy('nama')->get();
-      return view('guru.ubah_materi', compact('materi', 'user', 'aktifitas', 'school', 'kelass'));
+      return view('guru.ubah_materi', compact('materi', 'user', 'school', 'kelass'));
     }else{
       return redirect('siswa');
     }
@@ -105,11 +99,8 @@ class MateriController extends Controller
     if (Auth::user()->status == "G" or Auth::user()->status == "A") {
       $school = School::first();
       $user = User::where('id', '=', Auth::user()->id)->first();
-      $aktifitas = Aktifitas::join('users', 'aktifitas.id_user', '=', 'users.id')
-                              ->select('users.nama as nama_user', 'users.gambar', 'aktifitas.*')
-                              ->orderby('aktifitas.id', 'desc')->limit(5)->get();
       $materi = Materi::where('id', $id)->first();
-      return view('guru.detail_materi', compact('materi', 'user', 'aktifitas', 'school'));
+      return view('guru.detail_materi', compact('materi', 'user', 'school'));
     }else{
       return redirect('siswa');
     }
@@ -134,10 +125,7 @@ class MateriController extends Controller
       }
       $cek->gambar = $savename;
       $cek->save();
-      $aktifitas = new Aktifitas;
-      $aktifitas->id_user = Auth::user()->id;
-      $aktifitas->nama = "Merubah materi miliknya.";
-      $aktifitas->save();
+
       return 'ok';
     }else{
       $query = new Materi;
@@ -149,10 +137,7 @@ class MateriController extends Controller
       $query->hits    = '0';
       $query->sesi    = $sesi;
       $query->save();
-      $aktifitas = new Aktifitas;
-      $aktifitas->id_user = Auth::user()->id;
-      $aktifitas->nama = "Menulis materi baru.";
-      $aktifitas->save();
+
       return 'ok';
     }
   }
@@ -162,10 +147,7 @@ class MateriController extends Controller
     $id = Input::get('id');
     $cek = Materi::where('id', $id)->first();
     if ($cek != "") {
-      $aktifitas = new Aktifitas;
-      $aktifitas->id_user = Auth::user()->id;
-      $aktifitas->nama = "Menghapus materi miliknya yang berjudul ".$cek->judul.'.';
-      $aktifitas->save();
+
       $hapus = Materi::where('id', $id)->delete();
       return 'berhasil';
     }

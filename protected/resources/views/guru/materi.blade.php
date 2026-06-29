@@ -16,7 +16,7 @@
     $sapaan = "Ibu";
   }
 ?>
-<div class="col-sm-12 col-md-8 col-lg-8 dash-left">
+<div class="col-sm-12 col-md-12 col-lg-12 dash-left">
   <ol class="breadcrumb">
     <li><a href="{{ url('/guru') }}">Home</a></li>
     <li class="active">Materi</li>
@@ -175,44 +175,7 @@
     </div>
   </div>
 </div>
-<div class="col-sm-12 col-md-4 col-lg-4 dash-right">
-  <div class="panel panel-primary">
-    <div class="panel-heading">
-      <h4 class="panel-title">Aktifitas Terkini</h4>
-    </div>
-    <div class="panel-body">
-      <ul class="media-list user-list">
-      @if($aktifitas->count())
-      @foreach($aktifitas as $data)
-      <?php
-        $tanggal_aktifitas = explode(" ", $data->created_at);
-        $tanggal_aktifitas = explode("-", $tanggal_aktifitas[0]);
-        $tanggal_aktifitas = $tanggal_aktifitas[2].' '.$bulanpendek[$tanggal_aktifitas[1]].' '.$tanggal_aktifitas[0];
-        if ($data->gambar != "") {
-          $gambar_aktifitas = $data->gambar;
-        }else{
-          $gambar_aktifitas = 'noimage.jpg';
-        }
-      ?>
-        <li class="media">
-          <div class="media-left">
-            <a href="#">
-              <img class="media-object img-thumbnail" src="{{ url('img/'.$gambar_aktifitas) }}" alt="">
-            </a>
-          </div>
-          <div class="media-body">
-            <h4 class="media-heading nomargin"><a href="#">{{ $data->nama_user }}</a></h4>
-            {{ $data->nama }}
-            <small class="date"><i class="fa fa-clock-o"></i> {{ $tanggal_aktifitas }}</small>
-          </div>
-        </li>
-      @endforeach
-      @endif
-      </ul>
-      <a href="{{ url('/aktifitas') }}" class="btn btn-success" style="display: block; width: 100%; margin: 10px 0 0 0">Selengkapnya</a>
-    </div>
-  </div>
-</div>
+
 <script src="{{ url('lib/bootstrap/js/bootstrap.js') }}"></script>
 <script src="{{ url('/lib/dropzone/dropzone.js') }}"></script>
 <script src="{{url('lib/summernote/summernote.js')}}"></script>
