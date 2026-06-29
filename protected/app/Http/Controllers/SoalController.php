@@ -124,7 +124,12 @@ class SoalController extends Controller
       $id_soal = $id;
       $soal = Soal::where('id', '=', $id)->first();
       $detailsoals = Detailsoal::where('id_soal', '=', $id)->get();
-      return view('guru.duplicatesoal', compact('user', 'school', 'id_soal', 'soal', 'detailsoals'));
+      // Kirim daftar materi milik guru untuk pilihan saat duplikasi ke latihan
+      $materis = Materi::where('id_user', Auth::user()->id)
+                       ->where('status', 'Y')
+                       ->orderBy('judul')
+                       ->get();
+      return view('guru.duplicatesoal', compact('user', 'school', 'id_soal', 'soal', 'detailsoals', 'materis'));
     } else {
       return redirect('siswa');
     }
@@ -227,6 +232,13 @@ class SoalController extends Controller
                 $simpan->deskripsi = Input::get('deskripsi');
                 $simpan->kkm = Input::get('kkm');
                 $simpan->waktu = Input::get('waktu');
+                // Simpan jenis dan materi jika diubah saat duplikasi
+                $jenis_baru = Input::get('jenis_baru');
+                if ($jenis_baru != '') {
+                  $simpan->jenis = $jenis_baru;
+                  $simpan->materi = ($jenis_baru == 2) ? Input::get('materi_baru') : null;
+                }
+                $simpan->id_user = Auth::user()->id;
                 $simpan->save();
 
                 // iterate for each detail_soals with each id
