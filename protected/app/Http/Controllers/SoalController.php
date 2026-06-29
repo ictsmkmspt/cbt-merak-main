@@ -49,14 +49,20 @@ class SoalController extends Controller
     // Perlu ditambahkan field jadwal (hari, tgl, jam ujian)
     $id_user = Auth::user()->id;
     if (Auth::user()->status == "A"){
-      $soals   = Soal::paginate(15);
-      // Fix: ambil semua materi milik user, tanpa JOIN agar materi baru tetap muncul
+      $soals = Soal::leftJoin('materis', 'soals.materi', '=', 'materis.id')
+                   ->select('soals.*', 'materis.judul as nama_materi')
+                   ->orderBy('soals.id', 'desc')
+                   ->paginate(15);
       $materis = Materi::where('id_user', $id_user)
                        ->where('status', 'Y')
                        ->orderBy('judul')
                        ->get();
     }elseif (Auth::user()->status == "G") {
-      $soals   = Soal::where('id_user', $id_user)->paginate(15);
+      $soals = Soal::leftJoin('materis', 'soals.materi', '=', 'materis.id')
+                   ->select('soals.*', 'materis.judul as nama_materi')
+                   ->where('soals.id_user', $id_user)
+                   ->orderBy('soals.id', 'desc')
+                   ->paginate(15);
       $materis = Materi::where('id_user', $id_user)
                        ->where('status', 'Y')
                        ->orderBy('judul')

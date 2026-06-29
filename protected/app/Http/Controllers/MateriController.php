@@ -35,7 +35,10 @@ class MateriController extends Controller
       $aktifitas = Aktifitas::join('users', 'aktifitas.id_user', '=', 'users.id')
                               ->select('users.nama as nama_user', 'users.gambar', 'aktifitas.*')
                               ->orderby('aktifitas.id', 'desc')->limit(5)->get();
-      $materis = Materi::where('id_user', Auth::user()->id)->paginate(15);
+      $materis = Materi::leftJoin('kelas', 'materis.id_kelas', '=', 'kelas.id')
+                       ->select('materis.*', 'kelas.nama as nama_kelas')
+                       ->where('materis.id_user', Auth::user()->id)
+                       ->paginate(15);
       // Daftar semua kelas untuk dropdown filter
       $kelass = Kelas::orderBy('nama')->get();
       return view('guru.materi', compact('materis', 'user', 'aktifitas', 'school', 'kelass'));
@@ -184,7 +187,10 @@ class MateriController extends Controller
       });
     }
 
-    $materis = $query->paginate(15);
-    return view('guru.ajax.get_materi', compact('materis', 'q'));
+    $materis = $query->leftJoin('kelas', 'materis.id_kelas', '=', 'kelas.id')
+                     ->select('materis.*', 'kelas.nama as nama_kelas')
+                     ->paginate(15);
+    $kelass = Kelas::orderBy('nama')->get();
+    return view('guru.ajax.get_materi', compact('materis', 'q', 'kelass'));
   }
 }

@@ -3,7 +3,9 @@
 @section('content')
 <link href="{{ url('/lib/dropzone/dropzone.css') }}" rel="stylesheet">
 <link rel="stylesheet" href="{{url('lib/summernote/summernote.css')}}">
-<link rel="stylesheet" href="{{url('lib/fa/css/font-awesome.min.css')}}">
+<link rel="stylesheet" href="{{url('lib/fontawesome/css/font-awesome.min.css')}}">
+{{-- Fallback CDN jika file lokal tidak tersedia --}}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <script src="{{ url('/assets/assets/vendor/jquery.min.js') }}"></script>
 <?php
   include(app_path().'/functions/koneksi.php');
@@ -142,10 +144,10 @@
                     $status_label = "<span class='label label-danger'>Tidak tampil</span>";
                   }
                   // Tampilkan nama kelas jika ada
-                  if ($materi->id_kelas) {
-                    $kls_obj = $kelass->where('id', $materi->id_kelas)->first();
-                    $nama_kelas = $kls_obj ? "<span class='label label-info'>".$kls_obj->nama."</span>" : "<span class='label label-default'>Kelas #".$materi->id_kelas."</span>";
-                  }else{
+                  // Pakai nama_kelas dari hasil leftJoin - tidak perlu cari manual
+                  if ($materi->nama_kelas) {
+                    $nama_kelas = "<span class='label label-info'>".e($materi->nama_kelas)."</span>";
+                  } else {
                     $nama_kelas = "<span class='label label-default'>Semua Kelas</span>";
                   }
                 ?>

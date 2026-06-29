@@ -321,6 +321,7 @@
               <th>Deskripsi</th>
               <th>KKM</th>
               <th>Waktu</th>
+              <th>Materi</th>
               <th>Tgl Dibuat</th>
               <th style="width: 160px; text-align: center;">Aksi</th>
             </tr>
@@ -329,6 +330,16 @@
             <?php $no = $soals->firstItem(); ?>
             @if($soals->count())
             @foreach($soals as $soal)
+            <?php
+              // Kolom materi: tampil nama materi jika jenis latihan, kosong jika ujian
+              if ($soal->jenis == 2 && $soal->nama_materi) {
+                $materi_label = "<span class='label label-info'>" . e($soal->nama_materi) . "</span>";
+              } elseif ($soal->jenis == 2 && !$soal->nama_materi) {
+                $materi_label = "<span class='label label-warning'>Belum dipilih</span>";
+              } else {
+                $materi_label = "<span class='text-muted'>-</span>";
+              }
+            ?>
             <?php
               $tanggal = explode(" ", $soal->created_at);
               $tanggal = explode("-", $tanggal[0]);
@@ -341,6 +352,7 @@
               <td>{{ $soal->deskripsi }}</td>
               <td>{{ $soal->kkm }}</td>
               <td>{{ $soal->waktu/60 }} menit</td>
+              <td>{!! $materi_label !!}</td>
               <td>{{ $tanggal }}</td>
               <td style="text-align: center;">
                 <a href="{{ url('/edit-soal/'.$soal->id) }}" class="btn btn-xs btn-success" data-toggle='tooltip' title="Ubah Soal"><i class="fa fa-pencil-square-o"></i></a>
@@ -351,7 +363,7 @@
             </tr>
             @endforeach
             @else
-            <tr><td colspan="8" class="alert alert-danger">Belum ada data untuk ditampilkan.</td></tr>
+            <tr><td colspan="9" class="alert alert-danger">Belum ada data untuk ditampilkan.</td></tr>
             @endif
           </tbody>
         </table>
