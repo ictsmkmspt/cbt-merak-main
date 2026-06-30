@@ -1,61 +1,149 @@
-
 @extends('layouts/welcome')
 @section('content')
-<!-- <style type="text/css" media="screen">
-  body{
-    color: #fff;
-  }
-</style> -->
-
-<link rel="icon" href="{{ ('img/favicon.png') }}">
-<hr class="prettyline">
-<div class="android-content mdl-layout__content" style="background-color:#f1f1f1;">
-<div class="bungkuslogin" style="background-color:rgba(0, 0, 0, 0.75); color:#d5d9e2; padding:15px;">
-    <center>
-    <?php
-        include(app_path() . '/functions/koneksi.php');
-        $conn = new mysqli($hostdb, $userdb, $passdb, $namedb);
-        if ($conn->connect_error) {
-            die("Connection failed: " . $conn->connect_error);
-        }
-        $sql = "SELECT * FROM schools";
-        $result = $conn->query($sql);
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                $namasekolah = $row["nama"];
-                $logosekolah = $row['logo'];
-            }
-        } else {
-            $namasekolah = "";
-        }
-        $conn->close();
-    ?>
-    <h3>Merak Computer Based Test</h3>
-    <h2><b>{{ $namasekolah }}</b></h2>
-    <h3>Silahkan Login untuk mengakses halaman Aplikasi Ujian</h3>
-    <em>Developing & Progress by: <a href="#" target="blank" title="ict@smkmuhsampit.sch.id" style="color: #97b5fc;">ICT smkmuhsampit</a></em>
-    <br>
-    <a href="{{ url('/') }}"><button type="button" class="btn btn-success btn-lg" data-toggle="tooltip" title="Kembali kehalaman depan"><span class="glyphicon glyphicon-home"></span> Home</button></a>
-    <button class="btn btn-primary btn-lg" href="#signup" data-toggle="modal" data-target=".bs-modal-sm" style="margin: 15px 0 15px 0;" id="logtooltip" title="Login ke halaman Anda"><span class="glyphicon glyphicon-lock"></span> Login</button>
-    <br><em>version <b><?php echo(config('app.version')) ?></b></em>
-    </center>
-    @if (count($errors) > 0)
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-</div>
-</div>
-
-<hr class="prettyline">
-
 <?php
-    /*}else{
-      echo "selamat datang";
-    }*/
-  ?>
+  include(app_path() . '/functions/koneksi.php');
+  $conn = new mysqli($hostdb, $userdb, $passdb, $namedb);
+  $namasekolah = ''; $logosekolah = '';
+  if (!$conn->connect_error) {
+    $r = $conn->query("SELECT * FROM schools LIMIT 1");
+    if ($r && $r->num_rows > 0) {
+      $row = $r->fetch_assoc();
+      $namasekolah = $row['nama'];
+      $logosekolah = $row['logo'];
+    }
+  }
+?>
+<style>
+.login-page {
+  min-height: calc(100vh - 62px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f7f9fc;
+  padding: 40px 16px;
+}
+.login-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 40px rgba(26,79,160,.11);
+  padding: 44px 48px;
+  width: 100%;
+  max-width: 420px;
+  border: 1px solid #edf1f7;
+}
+.login-logo {
+  width: 72px; height: 72px;
+  border-radius: 18px;
+  background: #eef4ff;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 18px;
+  font-size: 34px;
+}
+.login-school {
+  text-align: center;
+  margin-bottom: 28px;
+}
+.login-school h2 {
+  font-size: 17px; font-weight: 700; color: #0f2a5e; margin-bottom: 4px;
+}
+.login-school p {
+  font-size: 12px; color: #9aaabf;
+}
+.form-label {
+  font-size: 12px; font-weight: 600; color: #4a6080;
+  display: block; margin-bottom: 6px; letter-spacing: .3px;
+}
+.form-input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid #e0e8f0;
+  border-radius: 9px;
+  font-size: 14px;
+  color: #0f2a5e;
+  background: #f7f9fc;
+  transition: border .2s;
+  outline: none;
+  margin-bottom: 16px;
+}
+.form-input:focus { border-color: #1a4fa0; background: #fff; }
+.btn-login {
+  width: 100%;
+  padding: 13px;
+  background: #1a4fa0;
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .2s;
+  margin-top: 6px;
+  letter-spacing: .3px;
+}
+.btn-login:hover { background: #163d80; }
+.btn-home {
+  display: block;
+  text-align: center;
+  margin-top: 16px;
+  font-size: 13px;
+  color: #7a8fa6;
+  text-decoration: none;
+}
+.btn-home:hover { color: #1a4fa0; }
+.alert-error {
+  background: #fff2f2;
+  border: 1px solid #ffd0d0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 12px;
+  color: #c0392b;
+}
+.remember-row {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 18px;
+}
+.remember-row input { width: 15px; height: 15px; accent-color: #1a4fa0; }
+.remember-row label { font-size: 12px; color: #7a8fa6; cursor: pointer; margin: 0; }
+</style>
+
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-logo">
+      @if($logosekolah)
+        <img src="{{ url('img/'.$logosekolah) }}" style="width:52px;height:52px;object-fit:contain;border-radius:12px">
+      @else
+        <img src="{{ url('img/logo.png') }}" style="width:52px;height:52px;object-fit:contain;border-radius:12px"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+        <span style="display:none;font-size:28px">🏫</span>
+      @endif
+    </div>
+    <div class="login-school">
+      <h2>{{ $namasekolah ?: 'CBT Sekolah' }}</h2>
+      <p>Login untuk mengakses halaman guru / admin</p>
+    </div>
+
+    @if (count($errors) > 0)
+      <div class="alert-error">
+        @foreach ($errors->all() as $error)
+          ⚠ {{ $error }}<br>
+        @endforeach
+      </div>
+    @endif
+
+    <form method="POST" action="{{ url('/auth/login') }}">
+      {!! csrf_field() !!}
+      <label class="form-label">Email</label>
+      <input type="email" name="email" class="form-input" placeholder="nama@sekolah.sch.id" required autofocus>
+      <label class="form-label">Password</label>
+      <input type="password" name="password" class="form-input" placeholder="••••••••" required>
+      <div class="remember-row">
+        <input type="checkbox" name="remember" id="remember">
+        <label for="remember">Ingat saya</label>
+      </div>
+      <button type="submit" class="btn-login">Masuk →</button>
+    </form>
+
+    <a href="{{ url('/') }}" class="btn-home">← Kembali ke Beranda</a>
+  </div>
+</div>
 @endsection

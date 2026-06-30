@@ -1,178 +1,321 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="{{ ('img/favicon.ico') }}">
-    <title>CBT - Merak Computer Based Test Web App</title>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="{{ url('img/favicon.ico') }}">
+  <title>CBT - {{ isset($namasekolah) ? $namasekolah : 'Selamat Datang' }}</title>
+  <meta name="logo-sekolah" content="{{ isset($logosekolah) && $logosekolah ? url('img/'.$logosekolah) : url('img/logo.png') }}">
+  <link rel="stylesheet" href="{{ url('/assets/bootstrap/css/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    <!-- <link href="{!! url('vendor/twbs/bootstrap/dist/css/bootstrap.min.css') !!}" rel="stylesheet"> -->
-    <link rel="stylesheet" href="{{ url('/assets/bootstrap/css/bootstrap.min.css') }}">
-    <link href="{!! url('css/login.css') !!}" rel="stylesheet">
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f7f9fc;
+      min-height: 100vh;
+    }
 
-  <!-- mdl -->
-    <link rel="stylesheet" href="{{ url('/assets/mdl/material.min.css') }}">
-    <script src="{{ url('/assets/mdl/material.min.js') }}"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="{{ url('/css/mdl-styles.css') }}">
-    <style>
-      #view-source {
-        position: fixed;
-        display: block;
-        right: 0;
-        bottom: 0;
-        margin-right: 40px;
-        margin-bottom: 40px;
-        z-index: 900;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-      <div class="android-header mdl-layout__header mdl-layout__header--waterfall">
-        <div class="mdl-layout__header-row">
-          <span class="android-title mdl-layout-title mdl-typography--text-uppercase" style="font-size:22px; font-weight:600; color:#77c259;">
-            {{ $namasekolah }}
-          </span>
-          <div class="android-header-spacer mdl-layout-spacer"></div>
-          <div class="android-search-box mdl-textfield mdl-js-textfield mdl-textfield--expandable mdl-textfield--floating-label mdl-textfield--align-right mdl-textfield--full-width">
-            <label class="mdl-button mdl-js-button mdl-button--icon" for="search-field">
-              <i class="material-icons">search</i>
-            </label>
-            <div class="mdl-textfield__expandable-holder">
-              <input class="mdl-textfield__input" type="text" id="search-field">
-            </div>
-          </div>
-          <div class="android-navigation-container">
-            <nav class="android-navigation mdl-navigation">
-              <a class="mdl-navigation__link mdl-typography--text-uppercase" href="/">Beranda</a>
-              <a class="mdl-navigation__link mdl-typography--text-uppercase" href="#">Profil</a>
-              <a class="mdl-navigation__link mdl-typography--text-uppercase" href="{{ url('guru') }}"><i class="material-icons">vpn_key</i> Guru</a>
-              <a class="mdl-navigation__link mdl-typography--text-uppercase" href="{{ url('lobby-siswa') }}"><i class="material-icons">vpn_key</i> Siswa</a>
-            </nav>
-          </div>
-          <span class="android-mobile-title mdl-layout-title" 
-            style="font-weight:600; color:#77c259; top:18px;">
-            SMKM SAMPIT
-          </span>
-          <button class="android-more-button mdl-button mdl-js-button mdl-button--icon mdl-js-ripple-effect" id="more-button">
-            <i class="material-icons">more_vert</i>
-          </button>
-          <ul class="mdl-menu mdl-js-menu mdl-menu--bottom-right mdl-js-ripple-effect" for="more-button">
-            <li class="mdl-menu__item">Contact</li>
-            <li class="mdl-menu__item">About</li>
-          </ul>
-        </div>
-      </div>
-      <div class="android-drawer mdl-layout__drawer">
-        <span class="mdl-layout-title">
-          <img class="android-logo-image" src="">
-        </span>
-        <nav class="mdl-navigation">
-          <a class="mdl-navigation__link" href="">Beranda</a>
-          <a class="mdl-navigation__link" href="">Profil</a>
-          <a class="mdl-navigation__link" href="">Program Keahlian</a>
-          <div class="android-drawer-separator"></div>
-          <a class="mdl-navigation__link" href="{{ url('guru') }}">CBT Login Guru</a>
-          <a class="mdl-navigation__link" href="{{ url('lobby-siswa') }}">CBT Login Siswa</a>
-          <div class="android-drawer-separator"></div>
-          <a class="mdl-navigation__link" href="">About</a>
-          <span class="mdl-navigation__link" href="">Contact</span>
-        </nav>
-      </div>
-      
-      @yield('content')
+    /* ===== NAVBAR ===== */
+    .navbar-welcome {
+      background: #fff;
+      border-bottom: 1.5px solid #e8edf3;
+      padding: 0 40px;
+      height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(30,80,160,.06);
+    }
+    .navbar-brand-text {
+      font-size: 17px;
+      font-weight: 700;
+      color: #1a4fa0;
+      letter-spacing: .3px;
+    }
+    .navbar-brand-text span {
+      color: #f5c518;
+    }
+    .navbar-links a {
+      color: #4a6080;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      margin-left: 28px;
+      letter-spacing: .3px;
+      transition: color .2s;
+    }
+    .navbar-links a:hover { color: #1a4fa0; }
+    .navbar-links a.btn-login-nav {
+      background: #1a4fa0;
+      color: #fff;
+      border-radius: 6px;
+      padding: 7px 18px;
+      font-size: 13px;
+    }
+    .navbar-links a.btn-login-nav:hover { background: #163d80; }
 
-      <footer class="android-footer mdl-mega-footer">
-        <div class="mdl-mega-footer--top-section">
-          <div class="mdl-mega-footer--right-section">
-            <a class="mdl-typography--font-light" href="#top">
-              Kembali ke atas
-              <i class="material-icons">expand_less</i>
-            </a>
-          </div>
-        </div>
-      </footer>
+    /* ===== HERO ===== */
+    .hero-section {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+      padding: 100px 20px 60px;
+    }
+    .hero-logo-wrap {
+      width: 110px;
+      height: 110px;
+      border-radius: 28px;
+      background: #fff;
+      box-shadow: 0 8px 32px rgba(26,79,160,.13);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 28px;
+      overflow: hidden;
+    }
+    .hero-logo-wrap img {
+      width: 90px;
+      height: 90px;
+      object-fit: contain;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: #eef4ff;
+      color: #1a4fa0;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      padding: 5px 16px;
+      border-radius: 20px;
+      margin-bottom: 18px;
+      text-transform: uppercase;
+    }
+    .hero-title {
+      font-size: 30px;
+      font-weight: 700;
+      color: #0f2a5e;
+      line-height: 1.25;
+      margin-bottom: 10px;
+      max-width: 600px;
+    }
+    .hero-title span { color: #f5c518; }
+    .hero-subtitle {
+      font-size: 14px;
+      color: #7a8fa6;
+      margin-bottom: 36px;
+      max-width: 440px;
+      line-height: 1.7;
+    }
+
+    /* ===== TOMBOL LOGIN ===== */
+    .btn-group-hero {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-hero {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 52px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: all .2s;
+      letter-spacing: .3px;
+    }
+    .btn-hero-primary {
+      background: #1a4fa0;
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(26,79,160,.25);
+    }
+    .btn-hero-primary:hover {
+      background: #163d80;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(26,79,160,.32);
+      color: #fff;
+      text-decoration: none;
+    }
+    .btn-hero-yellow {
+      background: #f5c518;
+      color: #1a2a40;
+      box-shadow: 0 4px 16px rgba(245,197,24,.28);
+    }
+    .btn-hero-yellow:hover {
+      background: #e8b800;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245,197,24,.38);
+      color: #1a2a40;
+      text-decoration: none;
+    }
+
+
+
+    /* ===== FOOTER ===== */
+    .footer-welcome {
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+      color: #b0bec5;
+      border-top: 1px solid #edf1f7;
+      background: #fff;
+    }
+
+    /* ===== MODAL POPUP LOGIN ===== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10,25,60,.45);
+      backdrop-filter: blur(4px);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+      background: #fff;
+      border-radius: 18px;
+      padding: 40px 44px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 16px 60px rgba(26,79,160,.18);
+      position: relative;
+      animation: popIn .22s ease;
+    }
+    @keyframes popIn {
+      from { transform: scale(.93); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+    .modal-close {
+      position: absolute; top: 16px; right: 18px;
+      background: none; border: none; font-size: 20px;
+      color: #9aaabf; cursor: pointer; line-height: 1;
+    }
+    .modal-close:hover { color: #0f2a5e; }
+    .modal-logo {
+      width: 56px; height: 56px; border-radius: 14px;
+      background: #eef4ff; display: flex; align-items: center;
+      justify-content: center; margin: 0 auto 14px; font-size: 26px;
+    }
+    .modal-title { text-align:center; margin-bottom: 24px; }
+    .modal-title h3 { font-size: 17px; font-weight: 700; color: #0f2a5e; margin-bottom: 3px; }
+    .modal-title p  { font-size: 12px; color: #9aaabf; }
+    .modal-input {
+      width: 100%; padding: 11px 14px;
+      border: 1.5px solid #e0e8f0; border-radius: 9px;
+      font-size: 14px; color: #0f2a5e; background: #f7f9fc;
+      outline: none; margin-bottom: 13px; transition: border .2s;
+    }
+    .modal-input:focus { border-color: #1a4fa0; background: #fff; }
+    .modal-label {
+      font-size: 12px; font-weight: 600; color: #4a6080;
+      display: block; margin-bottom: 5px; letter-spacing: .3px;
+    }
+    .modal-btn {
+      width: 100%; padding: 13px; background: #1a4fa0; color: #fff;
+      border: none; border-radius: 9px; font-size: 15px; font-weight: 700;
+      cursor: pointer; margin-top: 4px; transition: background .2s;
+    }
+    .modal-btn:hover { background: #163d80; }
+    .modal-footer-link {
+      text-align: center; margin-top: 14px; font-size: 12px; color: #9aaabf;
+    }
+    .modal-footer-link a { color: #1a4fa0; text-decoration: none; }
+    .modal-remember {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+    }
+    .modal-remember input { width:15px; height:15px; accent-color:#1a4fa0; }
+    .modal-remember label { font-size:12px; color:#7a8fa6; margin:0; cursor:pointer; }
+
+    @media (max-width: 600px) {
+      .navbar-welcome { padding: 0 16px; }
+      .navbar-links a:not(.btn-login-nav) { display: none; }
+      .hero-title { font-size: 22px; }
+      .btn-hero { padding: 12px 22px; font-size: 13px; }
+      .info-card { min-width: 140px; }
+    }
+  </style>
+</head>
+<body>
+
+  {{-- NAVBAR --}}
+  <nav class="navbar-welcome">
+    <div class="navbar-brand-text">
+      CBT <span>●</span> {{ isset($namasekolah) ? $namasekolah : 'Sekolah' }}
     </div>
-	
-    
+    <div class="navbar-links">
+      <a href="/">Beranda</a>
+    </div>
+  </nav>
+
+  @yield('content')
+
+  <footer class="footer-welcome">
+    &copy; {{ date('Y') }} {{ isset($namasekolah) ? $namasekolah : '' }} &mdash; Computer Based Test
+  </footer>
+
   <script src="{{ url('/assets/assets/vendor/jquery.min.js') }}"></script>
   <script src="{{ url('lib/bootstrap/js/bootstrap.js') }}"></script>
-  <script src="{{ url('/js/jquery.backstretch.min.js') }}"></script>
-  <script>
-    // $.backstretch("{{ url('/img/bg_merak02.jpg') }}", {speed: 150});
-    
-    $(function () {
-      $('[data-toggle="tooltip"]').tooltip()
-    })
-  </script>
 
-  <!-- [FIXED: iPhone login issued] -->
-  <!-- Modal -->
-  <div class="modal fade bs-modal-sm" id="myModal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-sm">
-      <div class="modal-content">
-          <br>
-          <div class="bs-example bs-example-tabs">
-              <ul id="myTab" class="nav nav-tabs">
-                <li class="active"><a href="#signin" data-toggle="tab">Sign In</a></li>
-                <li class=""><a href="#why" data-toggle="tab">About?</a></li>
-              </ul>
-          </div>
-        <div class="modal-body">
-          <div id="myTabContent" class="tab-content">
-          <div class="tab-pane fade in" id="why">
-          <p>Aplikasi ujian ini di kembangkan dengan desain responsive, sehingga bisa diakses dengan baik terhadap berbagai perangkat (Laptop, Tab atau Smartphone).</p>
-          <p>Jika mengalami kendala dalam pengoperasian aplikasi ini, silahkan hubungi ke Club TKJ SMK Muhammadiyah Sampit untuk mendapatkan bantuan teknis.</p>
-          </div>
-          <div class="tab-pane fade active in" id="signin">
-              <form method="POST" action="{{ url('/auth/login') }}">
-              {!! csrf_field() !!}
-              <fieldset>
-              <div class="control-group">
-                <label class="control-label" for="userid">Email:</label>
-                <div class="controls">
-                  <input type="email" name="email" class="form-control" value="" placeholder="Email">
-                </div>
-              </div>
-
-              <!-- Password input-->
-              <div class="control-group">
-                <label class="control-label" for="passwordinput">Password:</label>
-                <div class="controls">
-                  <input type="password" name="password" class="form-control" id="password" placeholder="Password">
-                </div>
-              </div>
-
-              <!-- Multiple Checkboxes (inline) -->
-              <div class="control-group">
-                <label class="control-label" for="rememberme">&nbsp;</label>
-                <div class="controls">
-                  <label class="checkbox inline" for="rememberme-0">
-                    <input type="checkbox" name="remember" id="remember" value="Remember me" style="margin: 0 0 0 0;">
-                    <span style="margin: 0 0 0 25px;">Remember me</span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- Button -->
-              <div class="control-group">
-                <label class="control-label" for="signin"></label>
-                <div class="controls">
-                  <button id="signin" name="signin" class="btn btn-success">Login</button>
-                  <button type="submit" class="btn btn-danger" data-dismiss="modal">Batal</button>
-                </div>
-              </div>
-              </fieldset>
-              </form>
-          </div>
+  {{-- MODAL POPUP LOGIN --}}
+  <div class="modal-overlay" id="loginModal" onclick="if(event.target===this)closeModal()">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div class="modal-logo" id="modal-logo-wrap">
+      <img id="modal-logo-img" src="" style="width:40px;height:40px;object-fit:contain;border-radius:10px">
+    </div>
+      <div class="modal-title">
+        <h3>Login Guru / Admin</h3>
+        <p>Masukkan email dan password Anda</p>
       </div>
+      <form method="POST" action="{{ url('/auth/login') }}">
+        {!! csrf_field() !!}
+        <label class="modal-label">Email</label>
+        <input type="email" name="email" class="modal-input" placeholder="nama@sekolah.sch.id" required>
+        <label class="modal-label">Password</label>
+        <input type="password" name="password" class="modal-input" placeholder="••••••••" required>
+        <div class="modal-remember">
+          <input type="checkbox" name="remember" id="rem">
+          <label for="rem">Ingat saya</label>
         </div>
-        
+        <button type="submit" class="modal-btn">Masuk →</button>
+      </form>
+      <div class="modal-footer-link">
+        Login sebagai siswa? <a href="{{ url('/lobby-siswa') }}">Klik di sini</a>
       </div>
     </div>
   </div>
 
-  </body>
+  <script>
+    function openModal()  { document.getElementById('loginModal').classList.add('active'); }
+    function closeModal() { document.getElementById('loginModal').classList.remove('active'); }
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeModal(); });
+    // Load logo sekolah ke modal
+    document.addEventListener('DOMContentLoaded', function() {
+      var logo = document.querySelector('meta[name="logo-sekolah"]');
+      if (logo) {
+        var img = document.getElementById('modal-logo-img');
+        img.src = logo.getAttribute('content');
+        img.onerror = function() {
+          this.style.display = 'none';
+          this.parentElement.innerHTML = '<span style="font-size:26px">🏫</span>';
+        };
+      }
+    });
+  </script>
+</body>
 </html>
