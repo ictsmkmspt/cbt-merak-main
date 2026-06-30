@@ -50,6 +50,7 @@ Route::get('/arsip-kelas', 'GuruController@arsipkelas');
 Route::get('/arsip-siswa', 'GuruController@arsipsiswa');
 Route::post('/arsipkankelas', 'GuruController@arsipkankelas');
 Route::post('/aktifkankelas', 'GuruController@aktifkankelas');
+Route::post('/hapusarsipkelas', 'GuruController@hapusarsipkelas');
 Route::get('detail-kelas/{id}', 'GuruController@detailkelas');
 Route::post('/cekkelassiswa', 'GuruController@cekkelassiswa');
 Route::post('/tambahsiswakekelas', 'GuruController@tambahsiswakekelas');

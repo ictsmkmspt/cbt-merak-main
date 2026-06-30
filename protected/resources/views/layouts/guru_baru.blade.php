@@ -14,6 +14,120 @@
 <link rel="stylesheet" href="{{ url('lib/weather-icons/css/weather-icons.css') }}">
 <link rel="stylesheet" href="{{ url('lib/jquery-toggles/toggles-full.css') }}">
 <link rel="stylesheet" href="{{ url('lib/morrisjs/morris.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+  /* ================= TEMA GURU — selaras dengan halaman Welcome ================= */
+  :root {
+    --biru: #1a4fa0;
+    --biru-tua: #163d80;
+    --kuning: #f5c518;
+    --kuning-tua: #e8b800;
+    --bg-soft: #f7f9fc;
+    --teks-judul: #0f2a5e;
+    --teks-muted: #7a8fa6;
+    --border-soft: #e8edf3;
+  }
+
+  body { background: var(--bg-soft) !important; font-family: 'Segoe UI', Arial, sans-serif; }
+
+  /* HEADER ATAS */
+  .headerpanel { background: #fff !important; border-bottom: 1.5px solid var(--border-soft); box-shadow: 0 2px 12px rgba(30,80,160,.06); }
+  .logopanel { background: var(--biru) !important; }
+  .logopanel h2 a { color: #fff !important; font-weight: 700; letter-spacing: .3px; }
+  .btn-logged { background: transparent !important; border: none; }
+  .btn-logged h4 { color: var(--teks-judul) !important; font-weight: 600; }
+
+  /* SIDEBAR KIRI */
+  .leftpanel { background: #fff !important; border-right: 1px solid var(--border-soft); }
+  .leftpanel-profile { background: var(--biru) !important; padding: 18px 14px; }
+  .leftpanel-profile .media-heading { color: #fff !important; font-weight: 700; }
+  .leftpanel-profile span { color: rgba(255,255,255,.8) !important; font-size: 11px; }
+  .leftpanel-profile img { border: 2px solid rgba(255,255,255,.5); }
+
+  .nav-sidebar { background: var(--biru) !important; border: none; }
+  .nav-sidebar > li > a { color: rgba(255,255,255,.8) !important; }
+  .nav-sidebar > li.active > a,
+  .nav-sidebar > li.active > a:hover { background: var(--biru-tua) !important; color: #fff !important; }
+
+  .nav-quirk > li > a { color: var(--teks-judul) !important; font-weight: 500; font-size: 13px; border-radius: 8px; margin: 2px 8px; transition: all .15s; }
+  .nav-quirk > li > a:hover { background: #eef4ff !important; color: var(--biru) !important; }
+  .nav-quirk > li.active > a,
+  .nav-quirk > li.nav-parent.active > a { background: var(--biru) !important; color: #fff !important; }
+  .nav-quirk .children > li > a { color: var(--teks-muted) !important; font-size: 12.5px; }
+  .nav-quirk .children > li.active > a,
+  .nav-quirk .children > li > a:hover { background: #eef4ff !important; color: var(--biru) !important; }
+  .nav-quirk .children > li.active > a { font-weight: 600; border-left: 3px solid var(--kuning); }
+
+  /* PANEL / CARD */
+  .panel { border: 1px solid var(--border-soft) !important; border-radius: 12px !important; box-shadow: 0 2px 14px rgba(26,79,160,.06) !important; overflow: hidden; }
+  .panel-default > .panel-heading,
+  .panel-heading { background: var(--biru) !important; color: #fff !important; border-radius: 0 !important; font-weight: 600; letter-spacing: .2px; }
+  .panel-primary > .panel-heading { background: var(--biru) !important; border-color: var(--biru) !important; }
+  .panel-primary { border-color: var(--border-soft) !important; }
+  .panel-body { background: #fff; }
+
+  .panel-announcement { background: linear-gradient(135deg, var(--biru), var(--biru-tua)) !important; color: #fff; border-radius: 12px !important; }
+  .panel-announcement h2, .panel-announcement h4 { color: #fff !important; }
+
+  /* TOMBOL */
+  .btn-primary { background: var(--biru) !important; border-color: var(--biru) !important; }
+  .btn-primary:hover { background: var(--biru-tua) !important; border-color: var(--biru-tua) !important; }
+  .btn-success { background: #1a8a4a !important; border-color: #1a8a4a !important; }
+  .btn-warning { background: var(--kuning) !important; border-color: var(--kuning) !important; color: #1a2a40 !important; font-weight: 600; }
+  .btn-warning:hover { background: var(--kuning-tua) !important; border-color: var(--kuning-tua) !important; }
+  .btn-danger { background: #c0392b !important; border-color: #c0392b !important; }
+
+  /* TABEL */
+  .table thead { background: #eef4ff; }
+  .table thead th { color: var(--teks-judul) !important; border-bottom: 2px solid var(--border-soft) !important; font-size: 12.5px; text-transform: uppercase; letter-spacing: .3px; }
+  .table tbody tr:hover { background: #f7faff !important; }
+
+  /* LABEL */
+  .label-primary { background: var(--biru) !important; }
+  .label-info { background: #2196d8 !important; }
+  .label-warning { background: var(--kuning) !important; color: #1a2a40 !important; }
+
+  /* FORM */
+  .form-control:focus { border-color: var(--biru) !important; box-shadow: 0 0 0 3px rgba(26,79,160,.12) !important; }
+
+  /* BREADCRUMB */
+  .breadcrumb { background: #fff; border: 1px solid var(--border-soft); border-radius: 8px; }
+  .breadcrumb > li + li::before { color: var(--teks-muted); }
+  .breadcrumb a { color: var(--biru); }
+
+  /* CONTENTPANEL FOOTER */
+  .contentpanel .panel-primary .panel-body { background: #fff !important; color: var(--teks-muted); font-size: 12px; text-align: center; }
+
+  /* ================= ICON MONOKROM — samakan semua warna ikon dengan tema ================= */
+  i.fa, .fa { color: inherit !important; }
+
+  /* Sidebar: ikon mengikuti warna teks link induknya */
+  .nav-quirk > li > a i.fa { color: var(--teks-judul) !important; opacity: .65; width: 18px; text-align: center; }
+  .nav-quirk > li > a:hover i.fa { color: var(--biru) !important; opacity: 1; }
+  .nav-quirk > li.active > a i.fa,
+  .nav-quirk > li.nav-parent.active > a i.fa { color: #fff !important; opacity: 1; }
+  .nav-quirk .children > li > a i.fa { color: var(--teks-muted) !important; opacity: .7; }
+  .nav-quirk .children > li.active > a i.fa,
+  .nav-quirk .children > li > a:hover i.fa { color: var(--biru) !important; opacity: 1; }
+
+  /* Header atas & profil */
+  .headerbar i.fa, .leftpanel-profile i.fa { color: var(--teks-judul) !important; }
+  .nav-sidebar i.fa { color: rgba(255,255,255,.85) !important; }
+
+  /* Tombol — ikon ikut warna teks tombol (putih di tombol solid) */
+  .btn i.fa { color: inherit !important; }
+  .btn-warning i.fa { color: #1a2a40 !important; }
+
+  /* Tabel aksi & label — ikon netral */
+  .table i.fa { color: inherit !important; }
+  .label i.fa { color: inherit !important; }
+
+  /* Breadcrumb & info text */
+  .breadcrumb i.fa, .text-muted i.fa { color: var(--teks-muted) !important; }
+
+  /* Alert box — ikon ikut warna teks alert (jangan dipaksa biru) */
+  .alert i.fa { color: inherit !important; }
+</style>
 </head>
 <body>
 <header>

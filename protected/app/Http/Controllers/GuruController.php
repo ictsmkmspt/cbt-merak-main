@@ -88,7 +88,33 @@ class GuruController extends Controller
     $school = School::first();
     $user   = User::where('id', Auth::user()->id)->first();
     $kelas_arsip = Kelas::where('status_arsip', 'arsip')->orderBy('nama')->paginate(15);
-    return view('guru.arsipkelas', compact('user', 'school', 'kelas_arsip'));
+    $aktifitas = Aktifitas::join('users', 'aktifitas.id_user', '=', 'users.id')
+                          ->select('users.nama as nama_user', 'users.gambar', 'aktifitas.*')
+                          ->orderBy('aktifitas.id', 'desc')->limit(5)->get();
+    return view('guru.arsipkelas', compact('user', 'school', 'kelas_arsip', 'aktifitas'));
+  }
+
+  public function hapusarsipkelas()
+  {
+    if (!Request::ajax()) return 'forbidden';
+    $id_kelas = Input::get('id_kelas');
+    $kelas = Kelas::where('id', $id_kelas)->where('status_arsip', 'arsip')->first();
+    if (!$kelas) return 'gagal';
+    $nama_kelas = $kelas->nama;
+
+    // Hitung & hapus semua siswa di kelas tersebut
+    $jumlah_siswa = User::where('id_kelas', $id_kelas)->where('status', 'S')->count();
+    User::where('id_kelas', $id_kelas)->where('status', 'S')->delete();
+
+    // Hapus kelasnya
+    $kelas->delete();
+
+    $aktifitas = new Aktifitas;
+    $aktifitas->id_user = Auth::user()->id;
+    $aktifitas->nama = "Menghapus permanen kelas '".$nama_kelas."' beserta ".$jumlah_siswa." siswa di dalamnya.";
+    $aktifitas->save();
+
+    return 'berhasil';
   }
 
   public function arsipsiswa()

@@ -40,8 +40,8 @@ class LatihanController extends Controller
                             ->orWhere('materis.id_kelas', '')
                             ->orWhere('materis.id_kelas', $id_kelas_siswa);
                       })
-                      ->orderBy('materis.id', 'DESC')
-                      ->paginate(4);
+                      ->orderBy('materis.judul', 'ASC')
+                      ->paginate(100);
 
     return view('siswa.latihan.index', compact('materis', 'user', 'school'));
   }
