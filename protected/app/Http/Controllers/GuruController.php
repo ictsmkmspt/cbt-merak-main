@@ -69,7 +69,8 @@ class GuruController extends Controller
     if (Auth::user()->status == "G" or Auth::user()->status == "A") {
       $user = User::where('email', '=', Auth::user()->email)->first();
       $school = School::first();
-      $kelas = Kelas::orderby('nama', 'asc')->paginate(15);
+      // Hanya tampilkan kelas yang masih aktif (belum diarsipkan)
+      $kelas = Kelas::where('status_arsip', 'aktif')->orderby('nama', 'asc')->paginate(15);
       $aktifitas = Aktifitas::join('users', 'aktifitas.id_user', '=', 'users.id')
                               ->select('users.nama as nama_user', 'users.gambar', 'aktifitas.*')
                               ->orderby('aktifitas.id', 'desc')->limit(5)->get();
@@ -77,6 +78,75 @@ class GuruController extends Controller
     }else{
       return redirect('siswa');
     }
+  }
+
+  // ===================== ARSIP KELAS & SISWA =====================
+
+  public function arsipkelas()
+  {
+    if (Auth::user()->status != "G" && Auth::user()->status != "A") return redirect('siswa');
+    $school = School::first();
+    $user   = User::where('id', Auth::user()->id)->first();
+    $kelas_arsip = Kelas::where('status_arsip', 'arsip')->orderBy('nama')->paginate(15);
+    return view('guru.arsipkelas', compact('user', 'school', 'kelas_arsip'));
+  }
+
+  public function arsipsiswa()
+  {
+    if (Auth::user()->status != "G" && Auth::user()->status != "A") return redirect('siswa');
+    $school = School::first();
+    $user   = User::where('id', Auth::user()->id)->first();
+    $siswa_arsip = User::leftJoin('kelas', 'users.id_kelas', '=', 'kelas.id')
+                       ->select('users.*', 'kelas.nama as nama_kelas')
+                       ->where('users.status', 'S')
+                       ->where('users.status_arsip', 'arsip')
+                       ->orderBy('users.nama')
+                       ->paginate(15);
+    return view('guru.arsipsiswa', compact('user', 'school', 'siswa_arsip'));
+  }
+
+  public function arsipkankelas()
+  {
+    if (!Request::ajax()) return 'forbidden';
+    $id_kelas = Input::get('id_kelas');
+    $kelas = Kelas::find($id_kelas);
+    if (!$kelas) return 'gagal';
+
+    // Arsipkan kelasnya
+    $kelas->status_arsip = 'arsip';
+    $kelas->save();
+
+    // Arsipkan juga semua siswa yang ada di kelas tersebut
+    $jumlah_siswa = User::where('id_kelas', $id_kelas)->where('status', 'S')->update(['status_arsip' => 'arsip']);
+
+    $aktifitas = new Aktifitas;
+    $aktifitas->id_user = Auth::user()->id;
+    $aktifitas->nama = "Mengarsipkan kelas '".$kelas->nama."' beserta ".$jumlah_siswa." siswa di dalamnya.";
+    $aktifitas->save();
+
+    return 'berhasil';
+  }
+
+  public function aktifkankelas()
+  {
+    if (!Request::ajax()) return 'forbidden';
+    $id_kelas = Input::get('id_kelas');
+    $kelas = Kelas::find($id_kelas);
+    if (!$kelas) return 'gagal';
+
+    // Aktifkan kembali kelasnya
+    $kelas->status_arsip = 'aktif';
+    $kelas->save();
+
+    // Aktifkan kembali siswa yang ada di kelas tersebut
+    $jumlah_siswa = User::where('id_kelas', $id_kelas)->where('status', 'S')->update(['status_arsip' => 'aktif']);
+
+    $aktifitas = new Aktifitas;
+    $aktifitas->id_user = Auth::user()->id;
+    $aktifitas->nama = "Mengaktifkan kembali kelas '".$kelas->nama."' beserta ".$jumlah_siswa." siswa di dalamnya.";
+    $aktifitas->save();
+
+    return 'berhasil';
   }
   public function ubah_kelas()
   {

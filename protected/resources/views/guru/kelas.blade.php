@@ -131,6 +131,13 @@
                    title="Lihat siswa di kelas ini">
                   <i class="fa fa-search"></i>
                 </a>
+                {{-- ARSIP --}}
+                <button class="btn btn-default btn-xs btn-arsip"
+                        data-id="{{ $dk->id }}"
+                        data-nama="{{ $dk->nama }}"
+                        title="Arsipkan kelas ini beserta siswanya">
+                  <i class="fa fa-archive"></i>
+                </button>
               </td>
             </tr>
             @endforeach
@@ -313,6 +320,26 @@ $('#btn-konfirm-hapus').click(function(){
   });
 });
 
+// ---- ARSIPKAN KELAS ----
+$(document).on('click', '.btn-arsip', function() {
+  var id   = $(this).data('id');
+  var nama = $(this).data('nama');
+  if (!confirm('Arsipkan kelas "' + nama + '"? Semua siswa di kelas ini juga akan ikut diarsipkan.')) return;
+  $.ajax({
+    type: 'POST',
+    url: '{{ url("/arsipkankelas") }}',
+    data: { id_kelas: id },
+    success: function(data) {
+      if (data === 'berhasil') {
+        $('#baris' + id).fadeOut(400, function(){ $(this).remove(); });
+        showNotif('success', 'Kelas "' + nama + '" beserta siswanya berhasil diarsipkan.');
+      } else {
+        showNotif('error', 'Gagal mengarsipkan kelas.');
+      }
+    }
+  });
+});
+
 // ---- TAMBAH KELAS ----
 $(document).ready(function() {
   $('#btntbhkelas').click(function() {
@@ -339,4 +366,3 @@ $(document).ready(function() {
 });
 </script>
 @endsection
- 

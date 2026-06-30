@@ -44,6 +44,12 @@ Route::post('/ajax/ubah-kelas', 'GuruController@ubah_kelas');
 Route::post('/tambahkelas', 'GuruController@tambahkelas');
 Route::post('/ubahkelas', 'GuruController@ubahkelas');
 Route::post('/hapuskelas', 'GuruController@hapuskelas');
+
+// ===== ARSIP KELAS & SISWA =====
+Route::get('/arsip-kelas', 'GuruController@arsipkelas');
+Route::get('/arsip-siswa', 'GuruController@arsipsiswa');
+Route::post('/arsipkankelas', 'GuruController@arsipkankelas');
+Route::post('/aktifkankelas', 'GuruController@aktifkankelas');
 Route::get('detail-kelas/{id}', 'GuruController@detailkelas');
 Route::post('/cekkelassiswa', 'GuruController@cekkelassiswa');
 Route::post('/tambahsiswakekelas', 'GuruController@tambahsiswakekelas');

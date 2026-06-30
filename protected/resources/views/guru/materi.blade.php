@@ -41,10 +41,25 @@
           <div class="wells" style="margin: 15px 0 0 0; display: none; background: #fff" id="wrap-materi">
             <div class="form-horizontal" style="margin: 0; padding-bottom: 0 !important;">
               <div class="form-group">
-                <label class="col-sm-2 control-label">Judul</label>
+                <label class="col-sm-2 control-label">Mata Pelajaran</label>
                 <div class="col-sm-10">
                   {{ csrf_field() }}
+                  <select class="form-control" id="mapel_judul" name="mapel_judul">
+                    <option value="">-- Pilih Mata Pelajaran (opsional) --</option>
+                    @foreach($mapels as $mp)
+                      <option value="{{ $mp->nama }}">{{ $mp->nama }}</option>
+                    @endforeach
+                  </select>
+                  <small class="text-muted"><i class="fa fa-info-circle"></i>
+                    Pilih mata pelajaran — akan otomatis ditambahkan di depan judul materi.
+                  </small>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label">Judul</label>
+                <div class="col-sm-10">
                   <input type="text" class="form-control" name="judul" id="judul" placeholder="Judul Materi">
+                  <small class="text-muted">Judul tersimpan: <b id="preview-judul" style="color:#072047">-</b></small>
                 </div>
               </div>
               <div class="form-group">
@@ -224,10 +239,22 @@
       });
 
       // Simpan materi baru
+      // Preview judul gabungan
+      function updatePreview() {
+        var mapel = $("#mapel_judul").val();
+        var judul = $("#judul").val().trim();
+        var hasil = mapel ? mapel + ' - ' + judul : judul;
+        $("#preview-judul").text(hasil || '-');
+      }
+      $("#mapel_judul, #judul").on('change keyup', updatePreview);
+
       $("#simpan").click(function(){
         $("#loading").show();
         var sesi      = $("#sesi").val();
-        var judul     = encodeURIComponent($("#judul").val());
+        var mapel     = $("#mapel_judul").val();
+        var judulAsli = $("#judul").val().trim();
+        var judulFinal = mapel ? mapel + ' - ' + judulAsli : judulAsli;
+        var judul     = encodeURIComponent(judulFinal);
         var isi       = encodeURIComponent($("#isi").code());
         var status    = $("input[name=status]:checked").val();
         var id_kelas  = $("#id_kelas").val();

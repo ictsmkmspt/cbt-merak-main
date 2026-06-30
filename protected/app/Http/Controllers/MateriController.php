@@ -19,6 +19,7 @@ use App\Kelas;
 use App\Jawab;
 use App\Aktifitas;
 use App\Soal;
+use App\Mapel;
 
 class MateriController extends Controller
 {
@@ -38,7 +39,8 @@ class MateriController extends Controller
                        ->paginate(15);
       // Daftar semua kelas untuk dropdown filter
       $kelass = Kelas::orderBy('nama')->get();
-      return view('guru.materi', compact('materis', 'user', 'school', 'kelass'));
+      $mapels = Mapel::orderBy('nama')->get();
+      return view('guru.materi', compact('materis', 'user', 'school', 'kelass', 'mapels'));
     }else{
       return redirect('siswa');
     }
