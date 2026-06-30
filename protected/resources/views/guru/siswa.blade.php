@@ -24,11 +24,7 @@
       <a href="{{ URL::to( '/readfile/data.xls')  }}" target="_blank"><button type="button" class="btn btn-success" data-toggle="tooltip" title="Download format excel untuk mengupload data siswa."><i class="fa fa-download" aria-hidden="true"></i> Excel</button></a>
       <button type="button" class="btn btn-success" data-toggle="collapse" href="#uploadexcel" aria-expanded="false"><i class="fa fa-upload" aria-hidden="true"></i> Siswa via Excel</button>
 
-      <a href="{{ URL::to( '/readfile/datacalon.xls')  }}" target="_blank"><button type="button" class="btn btn-success" data-toggle="tooltip" title="Download format excel untuk mengupload data calon siswa."><i class="fa fa-download" aria-hidden="true"></i> Excel Calon Siswa</button></a>
-      <button type="button" class="btn btn-success" data-toggle="collapse" href="#uploadexcelcalonsiswa" aria-expanded="false"><i class="fa fa-upload" aria-hidden="true"></i> Calon Siswa via Excel</button>
-
       <a href="#" disabled><button type="button" class="btn btn-danger" data-toggle="tooltip" title="Seluruh Siswa Akan Hilang Secara Permanent" disabled>Hapus Seluruh Siswa</button></a>
-      <a href="{{ url('/hapuscalonsiswa') }}" onclick="return confirm('Yakin seluruh data peserta PSB akan dihapus? Data yang dihapus tidak dapat dikemalikan. Hasil ujian siswa juga akan ikut terhapus. Tetap melanjutkan?')"><button type="button" class="btn btn-danger" data-toggle="tooltip" title="Seluruh Calon Siswa Akan Hilang Secara Permanent">Hapus Seluruh Calon Siswa</button></a>
 
       <div class="collapse in" id="wrapsiswa" style="margin:15px 0 0 0;">
         <div class="well">

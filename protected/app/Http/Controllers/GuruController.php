@@ -411,13 +411,16 @@ class GuruController extends Controller
       $user = User::where('id', Auth::user()->id)->first();
       $jawabs = Jawab::where('id_user', Auth::user()->id)->get();
       $kelas = Kelas::orderby('nama', 'asc')->get();
+      // Hanya tampilkan siswa aktif (status S, bukan arsip, bukan calon siswa)
       $users = User::join('kelas', 'users.id_kelas', '=', 'kelas.id')
                       ->select(['users.id', 'users.no_induk', 'users.nama', 'users.email', 'users.jk', 'kelas.nama as nama_kelas'])
                       ->where('users.status', '=', 'S')
-                      ->orwhere('users.status', '=', 'C')->paginate(10);
+                      ->where('users.status_arsip', '=', 'aktif')
+                      ->paginate(10);
       $jumlah_siswa = User::join('kelas', 'users.id_kelas', '=', 'kelas.id')
                             ->select(['users.id', 'users.no_induk', 'users.nama', 'users.email', 'users.jk', 'kelas.nama as nama_kelas'])
-                            ->where('users.status', '=', 'S')->get();
+                            ->where('users.status', '=', 'S')
+                            ->where('users.status_arsip', '=', 'aktif')->get();
       return view('guru.siswa', compact('user', 'school', 'jawabs', 'kelas', 'users', 'jumlah_siswa'));
   }
 
@@ -525,7 +528,8 @@ class GuruController extends Controller
                     ->select(['users.id', 'users.no_induk', 'users.nama', 'users.email', 'users.jk', 'kelas.nama as nama_kelas'])
                     ->where('users.nama', 'LIKE', '%'.$q.'%')
                     ->where('users.status', '=', 'S')
-                    ->orwhere('users.status', '=', 'C')->paginate(15);
+                    ->where('users.status_arsip', '=', 'aktif')
+                    ->paginate(15);
     return view('guru.ajax.get_siswa', compact('users'));
   }
 
