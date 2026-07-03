@@ -39,12 +39,15 @@ class GuruController extends Controller
   public function index()
   {
     if (Auth::user()->status == "G" or Auth::user()->status == "A") {
-      $school = School::first();
-      $user = User::where('id', '=', Auth::user()->id)->first();
+      $school    = School::first();
+      $user      = User::where('id', '=', Auth::user()->id)->first();
       $aktifitas = Aktifitas::join('users', 'aktifitas.id_user', '=', 'users.id')
                               ->select('users.nama as nama_user', 'users.gambar', 'aktifitas.*')
-                              ->orderby('aktifitas.id', 'desc')->limit(3)->get();
-      return view('guru.index', compact('user', 'school', 'aktifitas'));
+                              ->orderby('aktifitas.id', 'desc')->limit(5)->get();
+      // Statistik untuk dashboard
+      $jumlah_kelas  = Kelas::where('status_arsip', 'aktif')->count();
+      $jumlah_siswa  = User::where('status', 'S')->where('status_arsip', 'aktif')->count();
+      return view('guru.index', compact('user', 'school', 'aktifitas', 'jumlah_kelas', 'jumlah_siswa'));
     }else{
       return redirect('siswa');
     }

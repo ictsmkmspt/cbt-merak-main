@@ -86,67 +86,121 @@ a { transition: color .15s ease; }
 }
 .dropdown-menu > li > a:hover { background: var(--biru-soft) !important; color: var(--biru) !important; }
 
-/* ============ SIDEBAR KIRI ============ */
+/* ============ SIDEBAR KIRI — tema selaras dashboard ============ */
 .leftpanel {
-  background: var(--surface) !important;
+  background: #fff !important;
   border-right: 1px solid var(--border);
+  box-shadow: 2px 0 20px rgba(26,79,160,.06);
 }
+
+/* Profil area — gradient biru selaras hero card */
 .leftpanel-profile {
-  background: linear-gradient(135deg, var(--biru), var(--biru-tua)) !important;
-  padding: 22px 16px;
+  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%) !important;
+  padding: 20px 16px 18px;
   margin: 0;
+  position: relative;
+  overflow: hidden;
+}
+.leftpanel-profile::before {
+  content:''; position:absolute; top:-40px; right:-30px;
+  width:110px; height:110px;
+  background:rgba(255,255,255,.08); border-radius:50%;
+}
+.leftpanel-profile::after {
+  content:''; position:absolute; bottom:-25px; left:-20px;
+  width:70px; height:70px;
+  background:rgba(255,255,255,.05); border-radius:50%;
 }
 .leftpanel-profile img {
-  border: 2.5px solid rgba(255,255,255,.55);
-  border-radius: 12px;
+  border: 2.5px solid rgba(255,255,255,.65) !important;
+  border-radius: 12px !important;
+  width: 44px !important; height: 44px !important;
+  object-fit: cover;
 }
-.leftpanel-profile .media-heading { color: #fff !important; font-weight: 700; font-size: 14px; margin-bottom: 2px; }
-.leftpanel-profile span { color: rgba(255,255,255,.78) !important; font-size: 11px; }
+.leftpanel-profile .media-heading {
+  color: #fff !important; font-weight: 700;
+  font-size: 13.5px; margin-bottom: 2px;
+}
+.leftpanel-profile span { color: rgba(255,255,255,.75) !important; font-size: 11px; }
 
-.nav-sidebar { background: var(--biru-tua) !important; border: none; }
+/* Tab ikon (home / logout) */
+.nav-sidebar {
+  background: linear-gradient(135deg, #1a40a0, #1d4ed8) !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(255,255,255,.1) !important;
+}
 .nav-sidebar > li { flex: 1; }
 .nav-sidebar > li > a {
-  color: rgba(255,255,255,.75) !important;
-  border: none !important;
-  border-radius: 0 !important;
-  padding: 10px 0;
+  color: rgba(255,255,255,.7) !important;
+  border: none !important; border-radius: 0 !important;
+  padding: 11px 0; transition: all .15s;
 }
 .nav-sidebar > li.active > a,
-.nav-sidebar > li.active > a:hover,
-.nav-sidebar > li > a:hover { background: rgba(255,255,255,.08) !important; color: #fff !important; }
+.nav-sidebar > li > a:hover {
+  background: rgba(255,255,255,.15) !important;
+  color: #fff !important;
+}
 
-.nav-quirk { padding: 6px 0; }
+/* ===== NAVIGASI UTAMA ===== */
+.nav-quirk { padding: 10px 0 6px; }
+
+/* Sembunyikan label NAVIGASI */
+.nav-quirk .nav-header { display: none !important; }
+
+/* Item menu utama */
 .nav-quirk > li > a {
-  color: var(--judul) !important;
-  font-weight: 500;
-  font-size: 13px;
-  border-radius: var(--radius-sm);
-  margin: 2px 10px;
+  color: #334155 !important;
+  font-weight: 500; font-size: 13px;
+  border-radius: 10px;
+  margin: 2px 8px;
   padding: 10px 14px;
+  display: flex; align-items: center; gap: 9px;
   transition: all .15s ease;
 }
-.nav-quirk > li > a:hover { background: var(--biru-soft) !important; color: var(--biru) !important; }
+.nav-quirk > li > a:hover {
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+}
 .nav-quirk > li.active > a,
 .nav-quirk > li.nav-parent.active > a {
-  background: var(--biru) !important;
+  background: linear-gradient(135deg, #1d4ed8, #3b82f6) !important;
   color: #fff !important;
-  box-shadow: 0 4px 14px rgba(26,79,160,.25);
+  box-shadow: 0 4px 14px rgba(29,78,216,.25);
+  font-weight: 600;
 }
-.nav-quirk .children { padding: 2px 0 8px; }
+
+/* Submenu children */
+.nav-quirk .children { padding: 2px 0 6px; background: transparent; }
 .nav-quirk .children > li > a {
-  color: var(--muted) !important;
-  font-size: 12.5px;
-  padding: 8px 14px 8px 30px;
+  color: #64748b !important; font-size: 12px;
+  padding: 8px 12px 8px 26px;
   border-radius: 8px;
-  margin: 1px 10px 1px 18px;
+  margin: 1px 8px 1px 18px;
+  display: flex; align-items: center; gap: 7px;
+  transition: all .15s ease;
 }
-.nav-quirk .children > li > a:hover { background: var(--biru-soft) !important; color: var(--biru) !important; }
+.nav-quirk .children > li > a:hover {
+  background: #eff6ff !important; color: #1d4ed8 !important;
+}
 .nav-quirk .children > li.active > a {
-  background: var(--biru-soft) !important;
-  color: var(--biru) !important;
+  background: #eff6ff !important; color: #1d4ed8 !important;
   font-weight: 700;
-  border-left: 3px solid var(--kuning);
-  padding-left: 27px;
+  border-left: 3px solid #f59e0b;
+  padding-left: 23px;
+}
+
+/* Arrow expand/collapse */
+.nav-quirk > li.nav-parent > a::after {
+  content: ''; margin-left: auto;
+  width: 0; height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid currentColor;
+  opacity: .45; transition: transform .2s;
+}
+.nav-quirk > li.nav-parent.active > a::after,
+.nav-quirk > li.nav-parent.open > a::after {
+  transform: rotate(-180deg); opacity: 1;
 }
 
 /* ============ ICON — monokrom mengikuti tema ============ */
@@ -336,8 +390,8 @@ label, .control-label { color: var(--judul); font-weight: 600; font-size: 12.5px
 <body>
 <header>
   <div class="headerpanel" style="background: #fcfdff">
-    <div class="logopanel" style="background: #00050f">
-      <h2><a href="{{ url('/guru') }}" style="color: #fff">CBT SMK Muh Sampit</a></h2>
+    <div class="logopanel" style="background: linear-gradient(135deg,#1d4ed8,#3b82f6)">
+      <h2><a href="{{ url('/guru') }}" style="color:#fff;font-size:14px;letter-spacing:.2px">🎓 CBT SMK Muh Sampit</a></h2>
     </div>
     <div class="headerbar">
       <a id="menuToggle" class="menutoggle"><i class="fa fa-bars"></i></a>
@@ -416,10 +470,21 @@ label, .control-label { color: var(--judul); font-weight: 600; font-size: 12.5px
 
         <div class="tab-pane active" id="mainmenu">
           <ul class="nav nav-pills nav-stacked nav-quirk">
+            <li><span class="nav-header">Menu</span></li>
             <li <?php if ($url == 'guru') { echo "class='active'"; } ?>><a href="{{ url('/guru') }}"><i class="fa fa-home"></i> <span>Dashboard</span></a></li>
           </ul>
 
           <ul class="nav nav-pills nav-stacked nav-quirk">
+            <li><span class="nav-header">Data</span></li>
+
+	    <li class="nav-parent <?php if ($url == 'materi' or $url == 'soal-guru' or $url == 'detail-soal' or $url == 'ubah-detail-soal' or $url == 'edit-soal' or $url == 'detail-soal' or $url == 'hasil-guru' or $url == 'detail-hasil') { echo " active"; } ?>"><a href=""><i class="fa fa-graduation-cap"></i> <span>E-Learning</span></a>
+              <ul class="children">
+                <li <?php if ($url == 'materi') { echo "class='active'"; } ?>><a href="{{ url('/materi') }}"><i class="fa fa-book"></i> Materi</a></li>
+                <li <?php if ($url == 'soal-guru' or $url == 'detail-soal' or $url == 'ubah-detail-soal') { echo "class='active'"; } ?>><a href="{{ url('/soal-guru') }}"><i class="fa fa-pencil-square-o"></i> Soal</a></li>
+                <li <?php if ($url == 'hasil-guru' or $url == 'detail-hasil') { echo "class='active'"; } ?>><a href="{{ url('/hasil-guru') }}"><i class="fa fa-bar-chart"></i> Laporan</a></li>
+              </ul>
+            </li>
+
             <li class="nav-parent <?php if ($url == 'data-guru' or $url == 'detail-guru' or $url == 'kelas' or $url == 'detail-kelas' or $url == 'data-siswa' or $url == 'detail-kelas-siswa' or $url == 'iuran-siswa' or $url == 'iuran-bykelas' or $url == 'mapel') { echo " active"; } ?>"><a href=""><i class="fa fa-database"></i> <span>Master Data</span></a>
               <ul class="children">
                 <li <?php if ($url == 'data-guru' or $url == 'detail-guru') { echo "class='active'"; } ?>><a href="{{ url('/data-guru') }}"><i class="fa fa-user"></i> Guru</a></li>
@@ -432,21 +497,16 @@ label, .control-label { color: var(--judul); font-weight: 600; font-size: 12.5px
                 
               </ul>
             </li>
-
+ @if(Auth::user()->status=="A")
             <li class="nav-parent <?php if ($url == 'arsip-kelas' or $url == 'arsip-siswa') { echo " active"; } ?>"><a href=""><i class="fa fa-archive"></i> <span>Arsip</span></a>
               <ul class="children">
                 <li <?php if ($url == 'arsip-kelas') { echo "class='active'"; } ?>><a href="{{ url('/arsip-kelas') }}"><i class="fa fa-building"></i> Arsip Kelas</a></li>
                 <li <?php if ($url == 'arsip-siswa') { echo "class='active'"; } ?>><a href="{{ url('/arsip-siswa') }}"><i class="fa fa-user"></i> Arsip Siswa</a></li>
               </ul>
             </li>
+@endif
 
-            <li class="nav-parent <?php if ($url == 'materi' or $url == 'soal-guru' or $url == 'detail-soal' or $url == 'ubah-detail-soal' or $url == 'edit-soal' or $url == 'detail-soal' or $url == 'hasil-guru' or $url == 'detail-hasil') { echo " active"; } ?>"><a href=""><i class="fa fa-graduation-cap"></i> <span>E-Learning</span></a>
-              <ul class="children">
-                <li <?php if ($url == 'materi') { echo "class='active'"; } ?>><a href="{{ url('/materi') }}"><i class="fa fa-book"></i> Materi</a></li>
-                <li <?php if ($url == 'soal-guru' or $url == 'detail-soal' or $url == 'ubah-detail-soal') { echo "class='active'"; } ?>><a href="{{ url('/soal-guru') }}"><i class="fa fa-pencil-square-o"></i> Soal</a></li>
-                <li <?php if ($url == 'hasil-guru' or $url == 'detail-hasil') { echo "class='active'"; } ?>><a href="{{ url('/hasil-guru') }}"><i class="fa fa-bar-chart"></i> Laporan</a></li>
-              </ul>
-            </li>
+      
 
             <li <?php if ($url == 'profil-guru') { echo "class='active'"; } ?>><a href="{{ url('/profil-guru') }}"><i class="fa fa-cog"></i> Pengaturan</a></li>
             

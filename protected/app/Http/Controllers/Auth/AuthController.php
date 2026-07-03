@@ -64,4 +64,11 @@ class AuthController extends Controller
     }
 
     protected $username = 'email';
+
+    /**
+     * Redirect ke halaman guru setelah login berhasil.
+     * Jika siswa login, middleware akan redirect ke halaman siswa.
+     */
+    protected $redirectTo = '/guru';
+    protected $redirectAfterLogout = '/';
 }

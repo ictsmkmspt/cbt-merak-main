@@ -51,9 +51,13 @@ class MateriController extends Controller
     if (Auth::user()->status == "G" or Auth::user()->status == "A") {
       $school = School::first();
       $user = User::where('id', '=', Auth::user()->id)->first();
-      $materi = Materi::where('id', $id)->first();
-      $kelass = Kelas::orderBy('nama')->get();
-      return view('guru.ubah_materi', compact('materi', 'user', 'school', 'kelass'));
+      $materi    = Materi::where('id', $id)->first();
+      $kelass    = Kelas::orderBy('nama')->get();
+      $mapels    = Mapel::orderBy('nama')->get();
+      $aktifitas = Aktifitas::join('users', 'aktifitas.id_user', '=', 'users.id')
+                              ->select('users.nama as nama_user', 'users.gambar', 'aktifitas.*')
+                              ->orderby('aktifitas.id', 'desc')->limit(5)->get();
+      return view('guru.ubah_materi', compact('materi', 'user', 'school', 'kelass', 'mapels', 'aktifitas'));
     }else{
       return redirect('siswa');
     }

@@ -193,6 +193,7 @@
 
 <script src="{{ url('lib/bootstrap/js/bootstrap.js') }}"></script>
 <script src="{{ url('/lib/dropzone/dropzone.js') }}"></script>
+<script>Dropzone.autoDiscover = false;</script>
 <script src="{{url('lib/summernote/summernote.js')}}"></script>
 <script type="text/javascript">
   $.ajaxSetup({
