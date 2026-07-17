@@ -101,16 +101,19 @@ class MateriController extends Controller
   }
 
   public function detail($id)
-  {
-    if (Auth::user()->status == "G" or Auth::user()->status == "A") {
-      $school = School::first();
-      $user = User::where('id', '=', Auth::user()->id)->first();
-      $materi = Materi::where('id', $id)->first();
-      return view('guru.detail_materi', compact('materi', 'user', 'school'));
-    }else{
-      return redirect('siswa');
-    }
+{
+  if (Auth::user()->status == "G" or Auth::user()->status == "A") {
+    $school    = School::first();
+    $user      = User::where('id', '=', Auth::user()->id)->first();
+    $materi    = Materi::where('id', $id)->first();
+    $aktifitas = Aktifitas::join('users', 'aktifitas.id_user', '=', 'users.id')
+                            ->select('users.nama as nama_user', 'users.gambar', 'aktifitas.*')
+                            ->orderby('aktifitas.id', 'desc')->limit(5)->get();
+    return view('guru.detail_materi', compact('materi', 'user', 'school', 'aktifitas'));
+  }else{
+    return redirect('siswa');
   }
+}
 
   public function upload_gambar_materi()
   {

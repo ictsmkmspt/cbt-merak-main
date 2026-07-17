@@ -350,6 +350,42 @@ class SiswaController extends Controller
     return ($pilihan);
   }
 
+  // ===== SIMPAN JAWABAN ESSAY (auto-save) =====
+  public function simpan_jawaban_essay()
+  {
+    $jawaban_essay = Input::get('jawaban_essay');
+    $id_soal       = Input::get('id_soal');
+    $no_soal_id    = Input::get('no_soal_id');
+    $q_user        = User::where('id', Auth::user()->id)->first();
+
+    $q_jawab = Jawab::where('no_soal_id', $no_soal_id)
+                    ->where('id_soal', $id_soal)
+                    ->where('id_user', Auth::user()->id)->first();
+
+    if ($q_jawab != '') {
+      $q_jawab->jawaban_essay  = $jawaban_essay;
+      $q_jawab->nilai_essay    = null;
+      $q_jawab->status_koreksi = 'belum';
+      $q_jawab->pilihan        = '-';
+      $q_jawab->status         = 'N';
+      $q_jawab->save();
+    } else {
+      $query = new Jawab;
+      $query->no_soal_id    = $no_soal_id;
+      $query->id_soal       = $id_soal;
+      $query->id_user       = Auth::user()->id;
+      $query->id_kelas      = $q_user->id_kelas;
+      $query->nama          = $q_user->nama;
+      $query->pilihan       = '-';
+      $query->score         = 0;
+      $query->jawaban_essay = $jawaban_essay;
+      $query->status_koreksi= 'belum';
+      $query->status        = 'N';
+      $query->save();
+    }
+    return 'ok';
+  }
+
   public function kirimjawaban()
   {
     $id_soal = Input::get('id_soal');

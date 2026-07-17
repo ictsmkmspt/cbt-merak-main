@@ -319,39 +319,51 @@ class SoalController extends Controller
         $score = Input::get('score');
         $status = Input::get('status');
         $paket = Input::get('paket');
-        if ($soal!="" and $pila!="" and $pilb!="" and $pilc!="" and $pild!="" and $pile!="" and $paket!="" and $score!="" and $status!="" and $score!="") {
+        $tipe_soal = Input::get('tipe_soal') ?: 'pg';
+        $bobot     = Input::get('bobot') ?: 10;
+
+        // Validasi: essay hanya butuh soal, score, status. PG butuh pilihan + kunci
+        $valid_pg    = ($tipe_soal == 'pg' && $pila!="" && $pilb!="" && $pilc!="" && $pild!="" && $pile!="" && $kunci!="");
+        $valid_essay = ($tipe_soal == 'essay');
+        $valid_umum  = ($soal!="" && $paket!="" && $score!="" && $status!="");
+
+        if ($valid_umum && ($valid_pg || $valid_essay)) {
           $cek = Detailsoal::where('sesi', $sesi)->first();
           if($cek == ""){
             $simpan = new Detailsoal;
             $simpan->id_soal = $paket;
-            $simpan->soal = $soal;
-            $simpan->pila = $pila;
-            $simpan->pilb = $pilb;
-            $simpan->pilc = $pilc;
-            $simpan->pild = $pild;
-            $simpan->pile = $pile;
-            $simpan->kunci = $kunci;
-            $simpan->score = $score;
-            $simpan->status = $status;
+            $simpan->tipe    = $tipe_soal;
+            $simpan->bobot   = $bobot;
+            $simpan->soal    = $soal;
+            $simpan->pila    = $pila;
+            $simpan->pilb    = $pilb;
+            $simpan->pilc    = $pilc;
+            $simpan->pild    = $pild;
+            $simpan->pile    = $pile;
+            $simpan->kunci   = $kunci;
+            $simpan->score   = $score;
+            $simpan->status  = $status;
             $simpan->id_user = Auth::user()->id;
             $simpan->save();
             return 'berhasil';
           }else{
             $cek->id_soal = $paket;
-            $cek->soal = $soal;
-            $cek->pila = $pila;
-            $cek->pilb = $pilb;
-            $cek->pilc = $pilc;
-            $cek->pild = $pild;
-            $cek->pile = $pile;
-            $cek->kunci = $kunci;
-            $cek->score = $score;
-            $cek->status = $status;
+            $cek->tipe    = $tipe_soal;
+            $cek->bobot   = $bobot;
+            $cek->soal    = $soal;
+            $cek->pila    = $pila;
+            $cek->pilb    = $pilb;
+            $cek->pilc    = $pilc;
+            $cek->pild    = $pild;
+            $cek->pile    = $pile;
+            $cek->kunci   = $kunci;
+            $cek->score   = $score;
+            $cek->status  = $status;
             $cek->save();
             return 'berhasil';
           }
         }else{
-          return '<b>Error:</b> Data Soal belum lengkap. Silahkan lengkapi data diatas...';
+          return '<b>Error:</b> Data Soal belum lengkap. Soal, Score, dan Status wajib diisi. Untuk PG, lengkapi pilihan A-E dan kunci.';
         }
       }
   }
