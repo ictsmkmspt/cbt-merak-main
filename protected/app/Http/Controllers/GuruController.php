@@ -23,6 +23,7 @@ use App\Jawab;
 use App\Aktifitas;
 use App\Soal;
 use App\Detailsoal;
+use App\Materi;
 use App\Countexamtime;
 use SebastianBergmann\Environment\Console;
 use Barryvdh\Debugbar\Facade as Debugbar;
@@ -45,9 +46,20 @@ class GuruController extends Controller
                               ->select('users.nama as nama_user', 'users.gambar', 'aktifitas.*')
                               ->orderby('aktifitas.id', 'desc')->limit(5)->get();
       // Statistik untuk dashboard
-      $jumlah_kelas  = Kelas::where('status_arsip', 'aktif')->count();
-      $jumlah_siswa  = User::where('status', 'S')->where('status_arsip', 'aktif')->count();
-      return view('guru.index', compact('user', 'school', 'aktifitas', 'jumlah_kelas', 'jumlah_siswa'));
+      // Statistik untuk dashboard
+      if (Auth::user()->status == "A") {
+        $jumlah_materi  = Materi::count();
+        $jumlah_soal    = Soal::count();
+        $jumlah_laporan = Jawab::join('soals', 'jawabs.id_soal', '=', 'soals.id')
+                              ->groupby('jawabs.id_soal')->get()->count();
+      } else {
+        $jumlah_materi  = Materi::where('id_user', Auth::user()->id)->count();
+        $jumlah_soal    = Soal::where('id_user', Auth::user()->id)->count();
+        $jumlah_laporan = Jawab::join('soals', 'jawabs.id_soal', '=', 'soals.id')
+                              ->where('soals.id_user', Auth::user()->id)
+                              ->groupby('jawabs.id_soal')->get()->count();
+      }
+      return view('guru.index', compact('user', 'school', 'aktifitas', 'jumlah_materi', 'jumlah_soal', 'jumlah_laporan'));
     }else{
       return redirect('siswa');
     }

@@ -33,8 +33,8 @@ class EssayController extends Controller
             $query = Soal::orderBy('id', 'desc');
         }
         // Filter hanya soal yang punya butir essay
-	$id_soals_essay = Detailsoal::where('tipe', 'essay')
-	                            ->lists('id_soal')->unique()->toArray();
+        $id_soals_essay = Detailsoal::where('tipe', 'essay')
+                            ->lists('id_soal')->unique()->toArray();
 
         $soals = $query->whereIn('id', $id_soals_essay)->paginate(15);
 

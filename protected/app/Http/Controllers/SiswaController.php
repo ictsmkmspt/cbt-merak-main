@@ -194,6 +194,22 @@ class SiswaController extends Controller
         // return redirect('soal-siswa/forbidden');
       // }
 
+      $soal = Soal::where('id', $id)->first();
+
+      // Latihan (jenis = 2) hanya boleh dikerjakan 1 kali.
+      // Dicek dari jawabs.status = 'Y' (sudah difinalisasi lewat "Akhiri Ujian"
+      // atau otomatis saat waktu habis) — bukan sekadar ada baris jawaban,
+      // supaya siswa yang masih di tengah pengerjaan tetap bisa lanjut.
+      if ($soal && $soal->jenis == 2) {
+        $sudahSelesai = Jawab::where('id_soal', $id)
+                              ->where('id_user', $iduser)
+                              ->where('status', 'Y')
+                              ->exists();
+        if ($sudahSelesai) {
+          return redirect('/latihan')->with('info_latihan', 'Latihan "'.$soal->paket.'" sudah pernah Anda kerjakan. Latihan hanya dapat dikerjakan 1 kali.');
+        }
+      }
+
       $soals = Detailsoal::where('id_soal', $id)->orderBy(DB::raw('RAND()'))->get();
       $user = User::where('id', Auth::user()->id)->first();
       $school = School::first();
@@ -203,7 +219,6 @@ class SiswaController extends Controller
                       ->where('detailsoals.id_soal', $id)
                       ->orderBy(DB::raw('RAND()'))->first();
       $jumlah_soal = Detailsoal::where('id_soal', $id)->get();
-      $soal = Soal::where('id', $id)->first();
       // $soal = null;
       $countexamtime = Countexamtime::where('id_soal', $id)->where('id_user', Auth::user()->id)->first();
       return view('siswa.detail_soal', compact('idsoal', 'soals', 'user', 'school', 'soal', 'detailsoal', 'jumlah_soal', 'countexamtime'));
@@ -389,14 +404,23 @@ class SiswaController extends Controller
   public function kirimjawaban()
   {
     $id_soal = Input::get('id_soal');
+    $this->finalisasiJawaban($id_soal, Auth::user()->id, false);
+  }
+
+  // dipanggil dari kirimjawaban() manual ATAU otomatis saat waktu habis
+  private function finalisasiJawaban($id_soal, $id_user, $karena_waktu_habis = false)
+  {
     $cek_jawaban = Jawab::where('id_soal', $id_soal)
-                          ->where('id_user', Auth::user()->id)
+                          ->where('id_user', $id_user)
                           ->get();
     foreach ($cek_jawaban as $value) {
+      if ($value->status == 'Y') continue; // sudah pernah difinalisasi, jangan diulang
       $value->status = 'Y';
+      if ($karena_waktu_habis) {
+        $value->status_habis_waktu = 'Y';
+      }
       $value->save();
     }
-    
   }
 
   public function hasil_siswa()
@@ -476,20 +500,31 @@ class SiswaController extends Controller
   public function countexamtime()
   {
     $id_soal = Input::get('id_soal');
-    $soal = Soal::where('id', $id_soal)->first();
-    $cek = Countexamtime::where('id_soal', $id_soal)->where('id_user', Auth::user()->id)->first();
+    $id_user = Auth::user()->id;
+    $soal    = Soal::where('id', $id_soal)->first();
+    $cek     = Countexamtime::where('id_soal', $id_soal)->where('id_user', $id_user)->first();
+
     if ($cek == '') {
+      // ping pertama kali -> tetapkan jam berakhirnya ujian, SEKALI SAJA
       $query = new Countexamtime;
-      $query->id_soal = $id_soal;
-      $query->id_user = Auth::user()->id;
-      $query->waktu = $soal->waktu;
+      $query->id_soal        = $id_soal;
+      $query->id_user        = $id_user;
+      $query->waktu          = $soal->waktu;
+      $query->waktu_selesai  = Carbon::now()->addSeconds((int) $soal->waktu);
       $query->save();
 
-      return 'Baru';
-    }else{
-      $cek->waktu = ($cek->waktu - 5);
-      $cek->save();
-      return 'Ubah';
+      return response()->json(['status' => 'baru', 'sisa_detik' => (int) $soal->waktu]);
     }
+
+    // hitung sisa waktu dari timestamp, BUKAN dari pengurangan manual
+    $sisa_detik = Carbon::now()->diffInSeconds(Carbon::parse($cek->waktu_selesai), false);
+
+    if ($sisa_detik <= 0) {
+      // waktu sudah habis -> paksa finalisasi jawaban walau siswa tidak submit manual
+      $this->finalisasiJawaban($id_soal, $id_user, true);
+      return response()->json(['status' => 'habis', 'sisa_detik' => 0]);
+    }
+
+    return response()->json(['status' => 'jalan', 'sisa_detik' => $sisa_detik]);
   }
 }

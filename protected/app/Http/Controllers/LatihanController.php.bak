@@ -70,8 +70,8 @@ class LatihanController extends Controller
       // Tandai soal latihan mana saja yang sudah difinalisasi (dikerjakan) oleh siswa ini
       $idSoalSelesai = Jawab::where('id_user', $user->id)
                              ->where('status', 'Y')
-                             ->whereIn('id_soal', $soals->pluck('id')->toArray())
-                             ->lists('id_soal')
+                             ->whereIn('id_soal', $soals->pluck('id'))
+                             ->pluck('id_soal')
                              ->unique()
                              ->toArray();
     }else{

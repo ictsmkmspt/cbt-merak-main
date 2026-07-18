@@ -47,6 +47,12 @@
   input[type=radio]{
     margin-top: 5px;
   }
+
+  .essay-wrap { margin-top:14px; padding:16px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:10px; }
+  .essay-label { font-size:12px; font-weight:600; color:#475569; margin-bottom:8px; display:block; }
+  .essay-textarea { width:100%; min-height:140px; padding:10px 13px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; color:#1e293b; font-family:inherit; resize:vertical; }
+  .essay-saved { font-size:11.5px; color:#059669; margin-top:6px; display:none; }
+  .essay-bobot { display:inline-block; background:#fef3c7; color:#d97706; border-radius:6px; padding:3px 10px; font-size:11px; font-weight:700; margin-top:10px; }
 </style>
 @extends('layouts/siswa_baru')
 @section('title', 'Detail Soal')
@@ -93,17 +99,21 @@
             <td>Waktu</td>
             <td>:</td>
             <td>
-              <?php
+	     <?php
                 echo $jumlah_menis = $soal->waktu/60;
                 echo " menit";
-                if($countexamtime == ""){
-                  $jam = floor($jumlah_menis/60);
-                  $menit = $jumlah_menis % 60;
+                if($countexamtime == "" || $countexamtime->waktu_selesai == null){
+                  $sisa_detik_awal = $soal->waktu;
+                  $jam = floor($sisa_detik_awal/3600);
+                  $menit = floor(($sisa_detik_awal % 3600) / 60);
+                  $detik = $sisa_detik_awal % 60;
                 }else{
-                  echo ', sisa waktu Anda : '.$jam_sisa = substr($countexamtime->waktu/60, 0, 3);
+                  $sisa_detik_awal = max(0, \Carbon\Carbon::now()->diffInSeconds(\Carbon\Carbon::parse($countexamtime->waktu_selesai), false));
+                  echo ', sisa waktu Anda : '.floor($sisa_detik_awal/60);
                   echo " menit";
-                  $jam = floor($jam_sisa/60);
-                  $menit = $jam_sisa % 60;
+                  $jam = floor($sisa_detik_awal/3600);
+                  $menit = floor(($sisa_detik_awal % 3600) / 60);
+                  $detik = $sisa_detik_awal % 60;
                 }
               ?>
             </td>
@@ -182,32 +192,67 @@
                 {!! $detailsoal->soal !!}
               </td>
             </tr>
+@if($detailsoal->tipe == 'essay')
+            <tr>
+              <td colspan="2">
+                <div class="essay-wrap">
+                  <label class="essay-label">✏️ Tulis jawaban kamu di bawah ini:</label>
+                  <textarea
+                    class="essay-textarea"
+                    id="essay_jawab{{ $detailsoal->id }}"
+                    placeholder="Ketik jawaban kamu di sini..."
+                  ></textarea>
+                  <div class="essay-saved" id="essay_saved{{ $detailsoal->id }}">✅ Jawaban tersimpan otomatis</div>
+                  <div class="essay-bobot">📊 Bobot: {{ $detailsoal->bobot }} poin</div>
+                </div>
+              </td>
+            </tr>
+            <script>
+              $(document).ready(function(){
+                var essayTimer{{ $detailsoal->id }};
+                $("#essay_jawab{{ $detailsoal->id }}").on('input', function(){
+                  clearTimeout(essayTimer{{ $detailsoal->id }});
+                  var textarea = $(this);
+                  essayTimer{{ $detailsoal->id }} = setTimeout(function(){
+                    var jawaban    = textarea.val();
+                    var id_soal    = "{{ $detailsoal->id_soal }}";
+                    var no_soal_id = $("#no_soal_id{{ $detailsoal->id }}").val();
+                    $.ajax({
+                      type: "POST",
+                      url: "{!! url('simpan-jawaban-essay') !!}",
+                      data: { jawaban_essay: jawaban, id_soal: id_soal, no_soal_id: no_soal_id },
+                      success: function(res){
+                        if (res === 'ok') {
+                          $("#essay_saved{{ $detailsoal->id }}").fadeIn(200).delay(2000).fadeOut(400);
+                          $("#get-soal{{ $detailsoal->id }}").removeClass('page gradient').addClass('page active');
+                        }
+                      }
+                    });
+                  }, 1500);
+                });
+              });
+            </script>
+@else
             <tr id="wrap_pil_a">
-              <!-- <td>&nbsp;</td> -->
               <td style="width: 10px"><input type="radio" name="pilih{{ $detailsoal->id }}" value="A" data-toggle='tooltip' title="Klik untuk menjawab."></td>
               <td>{!! $detailsoal->pila !!}</td>
             </tr>
             <tr id="wrap_pil_b">
-              <!-- <td>&nbsp;</td> -->
               <td><input type="radio" name="pilih{{ $detailsoal->id }}" value="B" data-toggle='tooltip' title="Klik untuk menjawab."></td>
               <td>{!! $detailsoal->pilb !!} </td>
             </tr>
             <tr id="wrap_pil_c">
-              <!-- <td>&nbsp;</td> -->
               <td><input type="radio" name="pilih{{ $detailsoal->id }}" value="C" data-toggle='tooltip' title="Klik untuk menjawab."></td>
               <td>{!! $detailsoal->pilc !!} </td>
             </tr>
             <tr id="wrap_pil_d">
-              <!-- <td>&nbsp;</td> -->
               <td><input type="radio" name="pilih{{ $detailsoal->id }}" value="D" data-toggle='tooltip' title="Klik untuk menjawab."></td>
               <td>{!! $detailsoal->pild !!} </td>
             </tr>
             <tr id="wrap_pil_e">
-              <!-- <td>&nbsp;</td> -->
               <td><input type="radio" name="pilih{{ $detailsoal->id }}" value="E" data-toggle='tooltip' title="Klik untuk menjawab."></td>
               <td>{!! $detailsoal->pile !!} </td>
             </tr>
-
             <script>
               $(document).ready(function(){
                 $("input[name=pilih{{ $detailsoal->id }}]").click(function(){
@@ -222,34 +267,19 @@
                     data: datastring,
                     success: function(data){
                       if (data == 'A') {
-                        $("#wrap_pil_b").removeClass('benar');
-                        $("#wrap_pil_c").removeClass('benar');
-                        $("#wrap_pil_d").removeClass('benar');
-                        $("#wrap_pil_e").removeClass('benar');
+                        $("#wrap_pil_b,#wrap_pil_c,#wrap_pil_d,#wrap_pil_e").removeClass('benar');
                         $("#wrap_pil_a").addClass('benar');
                       }else if(data == 'B'){
-                        $("#wrap_pil_a").removeClass('benar');
-                        $("#wrap_pil_c").removeClass('benar');
-                        $("#wrap_pil_d").removeClass('benar');
-                        $("#wrap_pil_e").removeClass('benar');
+                        $("#wrap_pil_a,#wrap_pil_c,#wrap_pil_d,#wrap_pil_e").removeClass('benar');
                         $("#wrap_pil_b").addClass('benar');
                       }else if(data == 'C'){
-                        $("#wrap_pil_b").removeClass('benar');
-                        $("#wrap_pil_a").removeClass('benar');
-                        $("#wrap_pil_d").removeClass('benar');
-                        $("#wrap_pil_e").removeClass('benar');
+                        $("#wrap_pil_a,#wrap_pil_b,#wrap_pil_d,#wrap_pil_e").removeClass('benar');
                         $("#wrap_pil_c").addClass('benar');
                       }else if(data == 'D'){
-                        $("#wrap_pil_b").removeClass('benar');
-                        $("#wrap_pil_c").removeClass('benar');
-                        $("#wrap_pil_a").removeClass('benar');
-                        $("#wrap_pil_e").removeClass('benar');
+                        $("#wrap_pil_a,#wrap_pil_b,#wrap_pil_c,#wrap_pil_e").removeClass('benar');
                         $("#wrap_pil_d").addClass('benar');
                       }else if(data == 'E'){
-                        $("#wrap_pil_b").removeClass('benar');
-                        $("#wrap_pil_c").removeClass('benar');
-                        $("#wrap_pil_d").removeClass('benar');
-                        $("#wrap_pil_a").removeClass('benar');
+                        $("#wrap_pil_a,#wrap_pil_b,#wrap_pil_c,#wrap_pil_d").removeClass('benar');
                         $("#wrap_pil_e").addClass('benar');
                       }
                       $("#get-soal{{ $detailsoal->id }}").removeClass('page gradient').addClass('page active');
@@ -258,6 +288,7 @@
                 });
               });
             </script>
+@endif
           </tbody>
         </table>
       </div>
@@ -331,27 +362,41 @@ jQuery.noConflict()(function ($) {
 
 
   $(document).ready(function(){
+    var sudahSubmit = false; // biar tidak double-submit
+
     $("#siap-ujian").click(function(){
       $("#wrap-siap-ujian").hide();
       $(".wrap_ujian").fadeIn(250);
-      $('#defaultCountdown').countdown({until: '+{{ $jam }}h +{{ $menit }}m +0s', format: 'HMS', onExpiry: liftOff});
-      // update waktu ujian untuk siswa
-      setInterval(function(){
+      $('#defaultCountdown').countdown({until: '+{{ $jam }}h +{{ $menit }}m +{{ $detik }}s', format: 'HMS', onExpiry: liftOff});
+
+      // cek sisa waktu ke server tiap 5 detik (berbasis timestamp, tetap akurat walau tab ditinggal)
+      function cekWaktuServer(){
+        if (sudahSubmit) return;
         var id_soal = $("#id_soal{{ $detailsoal->id }}").val();
         $.ajax({
           url: "{{ url('/countexamtime') }}",
           type: 'POST',
           data: 'id_soal='+id_soal,
+          dataType: 'json',
           success: function(data){
-            //console.log(data);
+            if (data.status === 'habis') {
+              kirimJawaban(true); // waktu sudah habis di server -> paksa submit
+            }
           }
         });
-      }, 5000);
+      }
+      setInterval(cekWaktuServer, 5000);
 
+      // begitu tab aktif lagi (misal siswa balik dari tab lain), langsung cek ulang
+      document.addEventListener('visibilitychange', function(){
+        if (!document.hidden) {
+          cekWaktuServer();
+        }
+      });
     });
-    function liftOff() { 
-      alert('Waktu ujian telah selesai. Jawaban Anda akan dikirimkan.');
-      kirimJawaban();
+
+    function liftOff() {
+      kirimJawaban(true);
     }
 
     var elem = document.getElementById("wrap_soal");
@@ -374,8 +419,14 @@ jQuery.noConflict()(function ($) {
       $("#wrap_soal").show();
     });
 
-    function kirimJawaban(){
-      if (!confirm('Yakin jawaban akan dikirim?')) return false;
+    function kirimJawaban(otomatis){
+      if (sudahSubmit) return;
+      if (!otomatis) {
+        if (!confirm('Yakin jawaban akan dikirim?')) return false;
+      } else {
+        alert('Waktu ujian telah selesai. Jawaban Anda akan dikirimkan secara otomatis.');
+      }
+      sudahSubmit = true;
       var id_soal = $("#id_soal{{ $detailsoal->id }}").val();
       $.ajax({
         url: "{{ url('/kirimjawaban') }}",
@@ -389,7 +440,7 @@ jQuery.noConflict()(function ($) {
     }
 
     $("#kirim").click(function(){
-      kirimJawaban();
+      kirimJawaban(false);
     });
   });
 });

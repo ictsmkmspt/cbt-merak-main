@@ -5,6 +5,12 @@
   <li class="active">Latihan</li>
 @endsection
 @section('content')
+@if(session('info_latihan'))
+  <div class="alert alert-info alert-dismissible" role="alert" style="margin-bottom: 20px;">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    {{ session('info_latihan') }}
+  </div>
+@endif
 <div class="row">
   @if($materis->count())
   @foreach($materis as $materi)

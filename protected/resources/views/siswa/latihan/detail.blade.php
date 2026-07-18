@@ -39,16 +39,25 @@
             <h4>Soal-soal latihan</h4>
             <hr>
             @if($soals->count())
-            @foreach($soals as $soal)
+	     @foreach($soals as $soal)
+              <?php $sudahSelesai = in_array($soal->id, $idSoalSelesai); ?>
               <div class="card col-md-4">
                 <div class="card-header bg-white center">
-                  <h4 class="card-title"><a href="{{ url('/soal-siswa/'.$soal->id) }}">{{ $soal->paket }}</a></h4>
+                  @if($sudahSelesai)
+                    <h4 class="card-title" style="color:#a6aab2;">{{ $soal->paket }}</h4>
+                    <span class="label label-success">Sudah Dikerjakan</span>
+                  @else
+                    <h4 class="card-title"><a href="{{ url('/soal-siswa/'.$soal->id) }}">{{ $soal->paket }}</a></h4>
+                  @endif
                 </div>
                 <div class="card-block">
                   <p class="m-b-0" style="color: #a6aab2; font-size: 11pt">
                     {{ $soal->deskripsi }}
                   </p>
                   <hr>
+                  @if($sudahSelesai)
+                    <a href="{{ url('/hasil-siswa/detail/'.$soal->id) }}" class="btn btn-sm btn-default btn-block">Lihat Hasil</a>
+                  @endif
                 </div>
               </div>
             @endforeach

@@ -115,6 +115,12 @@ Route::post('/hapusdetailsoal', 'SoalController@hapusdetailsoal');
 Route::post('/hapus_audio', 'SoalController@hapus_audio');
 
 Route::get('/hasil-guru', 'HasilController@hasil_guru');
+// ===== KOREKSI ESSAY =====
+Route::get('/essay', 'EssayController@index');
+Route::get('/essay/koreksi/{id_soal}', 'EssayController@koreksi');
+Route::get('/essay/koreksi/{id_soal}/{id_user}', 'EssayController@koreksi_siswa');
+Route::post('/essay/simpan-nilai', 'EssayController@simpan_nilai');
+Route::post('/essay/selesai', 'EssayController@selesai_koreksi');
 Route::post('/get-hasil-guru', 'HasilController@get_hasil_guru');
 
 Route::get('detail-hasil/{id}', 'HasilController@detailhasil');
@@ -140,6 +146,7 @@ Route::get('/ajax/halaman/soals', function(){
 
 Route::get('/proses-ujian/{id}', 'SiswaController@prosesUjian');
 Route::post('/simpanjawabankliksiswa', 'SiswaController@simpanjawabankliksiswa');
+Route::post('/simpan-jawaban-essay', 'SiswaController@simpan_jawaban_essay');
 Route::post('/kirimjawaban', 'SiswaController@kirimjawaban');
 
 Route::get('hasil-siswa', 'SiswaController@hasil_siswa');

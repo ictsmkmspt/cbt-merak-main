@@ -43,9 +43,17 @@
 /* STAT CARDS */
 .stat-cards {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: 14px;
   margin-bottom: 20px;
+}
+@media (max-width: 767px) {
+  .stat-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+  .stat-icon { width: 44px; height: 44px; font-size: 20px; }
+  .stat-info-value { font-size: 22px; }
+  .stat-card { padding: 16px 14px; gap: 10px; }
 }
 .stat-card {
   background: #fff;
@@ -72,11 +80,15 @@
 }
 .ic-blue   { background: #dbeafe; }
 .ic-yellow { background: #fef3c7; }
+.ic-green  { background: #d1fae5; }
+.ic-purple { background: #ede9fe; }
 .stat-info-label { font-size: 11.5px; color: #94a3b8; font-weight: 500; margin-bottom: 3px; }
 .stat-info-value { font-size: 28px; font-weight: 800; color: #1e3a8a; line-height: 1; }
 .stat-info-sub { font-size: 11px; color: #94a3b8; margin-top: 3px; }
-.stat-card-kelas { border-bottom: 3px solid #1d4ed8; }
-.stat-card-siswa { border-bottom: 3px solid #d97706; }
+.stat-card-materi  { border-bottom: 3px solid #1d4ed8; }
+.stat-card-soal    { border-bottom: 3px solid #d97706; }
+.stat-card-laporan { border-bottom: 3px solid #059669; }
+.stat-card-profil  { border-bottom: 3px solid #7c3aed; }
 
 /* PANEL kanan */
 .dash-right-panel { padding-left: 8px; }
@@ -101,22 +113,38 @@
     <div class="dash-hero-school">🏫 {{ $school->nama }}</div>
   </div>
 
-  {{-- STAT CARDS --}}
+{{-- STAT CARDS --}}
   <div class="stat-cards">
-    <a href="{{ url('/kelas') }}" class="stat-card stat-card-kelas">
-      <div class="stat-icon ic-blue">🏫</div>
+    <a href="{{ url('/materi') }}" class="stat-card stat-card-materi">
+      <div class="stat-icon ic-blue">📚</div>
       <div>
-        <div class="stat-info-label">Total Kelas</div>
-        <div class="stat-info-value">{{ $jumlah_kelas }}</div>
-        <div class="stat-info-sub">Kelas aktif</div>
+        <div class="stat-info-label">Total Materi</div>
+        <div class="stat-info-value">{{ $jumlah_materi }}</div>
+        <div class="stat-info-sub">Materi diunggah</div>
       </div>
     </a>
-    <a href="{{ url('/data-siswa') }}" class="stat-card stat-card-siswa">
-      <div class="stat-icon ic-yellow">👥</div>
+    <a href="{{ url('/soal-guru') }}" class="stat-card stat-card-soal">
+      <div class="stat-icon ic-yellow">📝</div>
       <div>
-        <div class="stat-info-label">Total Siswa</div>
-        <div class="stat-info-value">{{ $jumlah_siswa }}</div>
-        <div class="stat-info-sub">Siswa aktif</div>
+        <div class="stat-info-label">Total Soal</div>
+        <div class="stat-info-value">{{ $jumlah_soal }}</div>
+        <div class="stat-info-sub">Paket soal</div>
+      </div>
+    </a>
+    <a href="{{ url('/hasil-guru') }}" class="stat-card stat-card-laporan">
+      <div class="stat-icon ic-green">📊</div>
+      <div>
+        <div class="stat-info-label">Total Laporan</div>
+        <div class="stat-info-value">{{ $jumlah_laporan }}</div>
+        <div class="stat-info-sub">Paket dinilai</div>
+      </div>
+    </a>
+    <a href="{{ url('/profil-guru') }}" class="stat-card stat-card-profil">
+      <div class="stat-icon ic-purple">👤</div>
+      <div>
+        <div class="stat-info-label"></div>
+        <div class="stat-info-value" style="font-size:15px;line-height:1.3">Profil</div>
+        <div class="stat-info-sub">Akun saya</div>
       </div>
     </a>
   </div>

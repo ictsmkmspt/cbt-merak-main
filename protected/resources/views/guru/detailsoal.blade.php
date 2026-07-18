@@ -324,6 +324,16 @@
                   <div class="well" style="background:#fff;">
                     <?php $sesi = md5(date('Y:m:d:H:s:i')) ?>
                     <div class="form-horizontal">
+		     {{-- TIPE SOAL --}}
+		      <div class="form-group">
+		  <label class="col-sm-2 control-label">Tipe Soal</label>
+		  <div class="col-sm-10">
+		    <select id="tipe_soal" name="tipe_soal" class="form-control" style="width:50%">
+		      		<option value="pg"> Pilihan Ganda</option>
+		      		<option value="essay">️ Essay / Uraian</option>
+		    	</select>
+		        </div>
+		      </div>
                       <div class="form-group">
                         <label for="inputEmail3" class="col-sm-2 control-label">Soal</label>
                         <div class="col-sm-10">
@@ -345,6 +355,18 @@
                           </form>
                         </div>
                       </div>
+
+
+		{{-- BOBOT ESSAY (muncul jika tipe essay) --}}
+		<div class="form-group" id="wrap-bobot" style="display:none">
+		  <label class="col-sm-2 control-label">Bobot Nilai</label>
+		  <div class="col-sm-10">
+		    <input type="number" class="form-control" id="bobot" name="bobot"
+		      placeholder="Nilai maksimal soal essay (misal: 10)" value="10" min="1" max="100" style="width:50%">
+		    <small class="text-muted">Nilai maksimal yang bisa diberikan guru untuk soal essay ini</small>
+		  </div>
+		      </div>
+		      <div id="wrap-pg">
                       <div class="form-group">
                         <label for="inputEmail3" class="col-sm-2 control-label">Pilihan A</label>
                         <div class="col-sm-10">
@@ -388,12 +410,14 @@
                           </select>
                         </div>
                       </div>
+
                       <div class="form-group">
                         <label for="inputEmail3" class="col-sm-2 control-label">Score</label>
                         <div class="col-sm-10">
                           <input type="text" class="form-control" name="score" id="score" placeholder="Score">
                         </div>
                       </div>
+		      </div>{{-- /wrap-pg --}}
                       <div class="form-group">
                         <label for="inputEmail3" class="col-sm-2 control-label">Status</label>
                         <div class="col-sm-10">
@@ -423,6 +447,7 @@
                     <tr>
                       <th>NO</th>
                       <th>Soal</th>
+                      <th>Tipe</th>
                       <th>Kunci</th>
                       <th style="text-align:center;">Score</th>
                       <th style="text-align:center;">Status</th>
@@ -437,6 +462,13 @@
                   <tr>
                     <td>{{ $no++ }}</td>
                     <td id="formula">{!! $detailsoal->soal !!}</td>
+                    <td align="center">
+                      @if(isset($detailsoal->tipe) && $detailsoal->tipe == 'essay')
+                        <span style="background:#f59e0b;color:#fff;padding:3px 8px;border-radius:5px;font-size:11px">✏️ Essay</span>
+                      @else
+                        <span style="background:#3b82f6;color:#fff;padding:3px 8px;border-radius:5px;font-size:11px">📝 PG</span>
+                      @endif
+                    </td>
                     <td align="center">{!! $detailsoal->kunci !!}</td>
                     <td align="center">{!! $detailsoal->score !!}</td>
                     <td align="center" valign="midle"><?php
@@ -470,7 +502,7 @@
                   </script> 
                   @endforeach
                   @else
-                  <tr><td colspan="6" class="alert alert-danger">Belum ada data untuk ditampilkan.</td></tr>
+                  <tr><td colspan="7" class="alert alert-danger">Belum ada data untuk ditampilkan.</td></tr>
                   @endif
                   </tbody>
                 </table>
@@ -607,6 +639,18 @@
     $('#kunci').select2();
     $('#status').select2();
 
+    // ===== TOGGLE TIPE SOAL PG / ESSAY =====
+$("#tipe_soal").change(function(){
+  var tipe = $(this).val();
+  if (tipe === 'essay') {
+    $("#wrap-pg").slideUp();
+    $("#wrap-bobot").slideDown();
+  } else {
+    $("#wrap-pg").slideDown();
+    $("#wrap-bobot").slideUp();
+  }
+});
+
     initCK();
     DynamicMJ.update();
 
@@ -631,10 +675,13 @@
       var pild = encodeURIComponent(ckpild);
       var pile = encodeURIComponent(ckpile);
 
-      var kunci = $("#kunci").val();
-      var score = $("#score").val();
+      var tipe_soal = $("#tipe_soal").val();
+      var bobot     = $("#bobot").val() || 10;
+      // Jika essay: kunci = '-', score = bobot
+      var kunci = (tipe_soal === 'essay') ? '-' : $("#kunci").val();
+      var score = (tipe_soal === 'essay') ? bobot : $("#score").val();
       var status = $("#status").val();
-      var datastring = "paket="+paket+"&soal="+soal+"&pila="+pila+"&pilb="+pilb+"&pilc="+pilc+"&pild="+pild+"&pile="+pile+"&kunci="+kunci+"&score="+score+"&status="+status+"&sesi="+sesi;
+      var datastring = "paket="+paket+"&soal="+soal+"&pila="+pila+"&pilb="+pilb+"&pilc="+pilc+"&pild="+pild+"&pile="+pile+"&kunci="+kunci+"&score="+score+"&status="+status+"&sesi="+sesi+"&tipe_soal="+tipe_soal+"&bobot="+bobot;
       $.ajax({
         type: "POST",
         url: "{{ url('/simpanformdetailsoal') }}",
