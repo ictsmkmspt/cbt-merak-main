@@ -20,17 +20,33 @@
   <div class="panel panel-default">
     <div class="panel-heading" style="background: #072047; color: #fff">Laporan <b>{{$soal->paket}}</b> </div>
     <div class="panel-body">
+     @if(session('info_publikasi'))
+      <div class="alert alert-success alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        {{ session('info_publikasi') }}
+      </div>
+      @endif
       <?php
         $ada_essay = \App\Detailsoal::where('id_soal', $soal->id)
                       ->where('tipe', 'essay')->exists();
       ?>
-      @if($ada_essay)
       <div style="margin-bottom: 15px">
+        @if($ada_essay)
         <a href="{{ url('/essay/koreksi/'.$soal->id) }}" class="btn btn-warning">
           <i class="fa fa-pencil-square-o"></i> Koreksi Esai
         </a>
+        @endif
+
+        @if($soal->jenis != 2)
+          @if($soal->status_publikasi == 'Y')
+            <span class="btn btn-default disabled"><i class="fa fa-check-circle"></i> Nilai Sudah Dipublikasikan</span>
+          @else
+            <a href="{{ url('/publikasi-nilai/'.$soal->id) }}" class="btn btn-primary" onclick="return confirm('Publikasikan nilai ujian ini? Siswa akan bisa langsung melihat hasil ujiannya di menu Hasil Siswa setelah ini.');">
+              <i class="fa fa-bullhorn"></i> Publikasi Nilai
+            </a>
+          @endif
+        @endif
       </div>
-      @endif
       <table class="table table-bordered" id="tabelsoal">
         <thead>
           <tr>

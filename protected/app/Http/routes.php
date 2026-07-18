@@ -129,6 +129,7 @@ Route::get('downloadlaporanfullperkelas/{id}/{id_soal}', 'HasilController@downlo
 Route::get('detail-hasil-soal/{id}/{id_soal}', 'HasilController@detailhasilsoal');
 Route::post('/hentikan-ujian-siswa', 'HasilController@hentikanUjianSiswa');
 Route::post('/hentikan-ujian-massal', 'HasilController@hentikanUjianMassal');
+Route::get('/publikasi-nilai/{id}', 'HasilController@publikasiNilai');
 
 //Route::resource('siswa', 'SiswaController@index');
 Route::resource('siswa', 'SiswaController@index');

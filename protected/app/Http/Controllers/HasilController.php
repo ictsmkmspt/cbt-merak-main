@@ -229,4 +229,20 @@ class HasilController extends Controller
     }
   }
 
+  // Guru/Admin mempublikasikan nilai ujian supaya bisa dilihat siswa di menu hasil-siswa.
+  // Hanya berlaku untuk soal jenis Ujian (jenis != 2). Latihan selalu tampil otomatis.
+  public function publikasiNilai($id)
+  {
+    if (Auth::user()->status == "G" or Auth::user()->status == "A") {
+      $soal = Soal::where('id', $id)->first();
+      if ($soal && $soal->jenis != 2) {
+        $soal->status_publikasi = 'Y';
+        $soal->save();
+      }
+      return redirect()->back()->with('info_publikasi', 'Nilai paket soal "'.($soal ? $soal->paket : '').'" berhasil dipublikasikan dan sekarang bisa dilihat siswa.');
+    }else{
+      return redirect('siswa');
+    }
+  }
+
 }

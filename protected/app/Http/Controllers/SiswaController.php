@@ -432,7 +432,12 @@ class SiswaController extends Controller
               \DB::raw('sum(jawabs.score) as count')])
             ->where('jawabs.id_user', Auth::user()->id)
             ->where('status', 'Y')
-            /*->where('soals.jenis', 1)*/
+            // Nilai UJIAN (jenis != 2) hanya tampil kalau sudah dipublikasikan guru.
+            // Nilai LATIHAN (jenis = 2) selalu tampil langsung, tidak terpengaruh publikasi.
+            ->where(function($q) {
+                $q->where('soals.jenis', 2)
+                  ->orWhere('soals.status_publikasi', 'Y');
+            })
             ->orderby('jawabs.id', 'desc')
             ->groupby('id_soal')->paginate(10);
     return view('siswa.hasil', compact('user', 'school', 'jawabs'));
@@ -446,25 +451,13 @@ class SiswaController extends Controller
             ->where('jawabs.id_user', Auth::user()->id)
             ->where('jawabs.status', 'Y')
             ->where('soals.paket', 'LIKE', '%'.$q.'%')
+            ->where(function($qq) {
+                $qq->where('soals.jenis', 2)
+                   ->orWhere('soals.status_publikasi', 'Y');
+            })
             ->orderby('jawabs.id', 'desc')
             ->groupby('jawabs.id_soal')->paginate(10);
     return view('siswa.ajax.get_hasil', compact('jawabs'));
-  }
-  public function detail_hasil_siswa($id)
-  {
-    if (Auth::user()->status == "S" or Auth::user()->status =="C") {
-      $user = User::where('email', Auth::user()->email)->first();
-      $soal = Soal::where('id', '$id')->first();
-      $soals = Soal::where('id', '!=', '$id')->get();
-      $idsoal = $id;
-      
-      $jawabs = Jawab::join('detailsoals', 'jawabs.no_soal_id', '=', 'detailsoals.id')
-                        ->select('detailsoals.soal', 'detailsoals.kunci', 'jawabs.*')
-                        ->where('jawabs.id_soal', $id)->get();
-      return view('siswa.detail', compact('user', 'idsoal', 'soal', 'soals', 'jawabs'));
-    }else{
-        return redirect('guru');
-    }
   }
 
   public function detailujian($id)
