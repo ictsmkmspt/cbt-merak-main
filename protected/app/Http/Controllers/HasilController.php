@@ -15,6 +15,8 @@ use PhpExcelReader;
 use Spreadsheet_Excel_Reader;
 use mysqli;
 use Excel;
+use DB;
+use Carbon\Carbon;
 
 use App\User;
 use App\School;
@@ -25,8 +27,6 @@ use App\Soal;
 use App\Detailsoal;
 use App\Distribusisoal;
 use App\Countexamtime;
-use DB;
-use Carbon\Carbon;
 
 class HasilController extends Controller
 {
@@ -34,7 +34,7 @@ class HasilController extends Controller
   {
     $this->middleware('auth');
   }
-  
+
   public function hasil_guru()
   {
     if (Auth::user()->status == "G" or Auth::user()->status == "A") {
@@ -43,21 +43,16 @@ class HasilController extends Controller
       $kelas = Kelas::orderby('nama', 'asc')->get();
       $id_user = Auth::user()->id;
 
-      // Kumpulkan id_soal yang punya jawaban ATAU sedang dikerjakan (countexamtimes).
-      // Tidak pakai whereExists karena ada bug di vendor Laravel 5.1 project ini
-      // (compact('operator') dengan variabel yang tidak pernah didefinisikan).
-      $idSoalJawab  = DB::table('jawabs')->distinct()->lists('id_soal');
-      $idSoalAktif  = DB::table('countexamtimes')->distinct()->lists('id_soal');
-      $idSoalDilaporkan = array_values(array_unique(array_merge($idSoalJawab, $idSoalAktif)));
-
+      // Tampilkan SEMUA paket soal (baik yang sudah ada aktivitas maupun belum),
+      // diurutkan dari yang paling baru dibuat.
       $query = Soal::select('soals.*', DB::raw('soals.id as id_soal'))
-                    ->whereIn('soals.id', $idSoalDilaporkan);
+                    ->orderBy('soals.created_at', 'desc');
 
       if (Auth::user()->status == "G") {
         $query->where('soals.id_user', Auth::user()->id);
       }
 
-      $jawabs = $query->orderBy('soals.id', 'desc')->paginate(30);
+      $jawabs = $query->paginate(30);
 
       if (Auth::user()->status == "A"){
         $soals = Soal::paginate(30);
@@ -69,6 +64,7 @@ class HasilController extends Controller
       return redirect('siswa');
     }
   }
+
   public function get_hasil_guru()
   {
     if (Auth::user()->status == "G" or Auth::user()->status == "A") {
@@ -76,19 +72,15 @@ class HasilController extends Controller
       $q = Input::get('q');
       $id_user = Auth::user()->id;
 
-      $idSoalJawab  = DB::table('jawabs')->distinct()->lists('id_soal');
-      $idSoalAktif  = DB::table('countexamtimes')->distinct()->lists('id_soal');
-      $idSoalDilaporkan = array_values(array_unique(array_merge($idSoalJawab, $idSoalAktif)));
-
       $query = Soal::select('soals.*', DB::raw('soals.id as id_soal'))
                     ->where('soals.paket', 'LIKE', '%'.$q.'%')
-                    ->whereIn('soals.id', $idSoalDilaporkan);
+                    ->orderBy('soals.created_at', 'desc');
 
       if (Auth::user()->status == "G") {
         $query->where('soals.id_user', Auth::user()->id);
       }
 
-      $jawabs = $query->orderBy('soals.id', 'desc')->paginate(15);
+      $jawabs = $query->paginate(15);
 
       return view('guru.ajax.get_hasil_guru', compact('jawabs', 'user'));
     }else{
@@ -162,7 +154,7 @@ class HasilController extends Controller
     })->export('xls');
   }
 
- public function detailhasilsoal($id, $id_soal)
+  public function detailhasilsoal($id, $id_soal)
   {
     if (Auth::user()->status == "G" or Auth::user()->status == "A") {
       $school = School::first();
@@ -207,6 +199,7 @@ class HasilController extends Controller
       return redirect('siswa');
     }
   }
+
   // Admin menghentikan SEMUA siswa yang sedang mengerjakan soal apapun, sekaligus
   public function hentikanUjianMassal()
   {
@@ -224,8 +217,7 @@ class HasilController extends Controller
              ->where('status', 'N')
              ->update(['status' => 'Y']);
 
-        // expire-kan waktu di countexamtimes hanya untuk kombinasi yang memang sedang aktif,
-        // supaya siswa lain yang belum pernah mulai soal ini tidak ikut ke-reset timernya
+        // expire-kan waktu di countexamtimes hanya untuk kombinasi yang memang sedang aktif
         Countexamtime::where('id_soal', $item->id_soal)
                       ->where('id_user', $item->id_user)
                       ->update(['waktu_selesai' => Carbon::now()->subSecond()]);
@@ -236,4 +228,5 @@ class HasilController extends Controller
       return redirect('siswa');
     }
   }
+
 }

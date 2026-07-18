@@ -20,6 +20,17 @@
   <div class="panel panel-default">
     <div class="panel-heading" style="background: #072047; color: #fff">Laporan <b>{{$soal->paket}}</b> </div>
     <div class="panel-body">
+      <?php
+        $ada_essay = \App\Detailsoal::where('id_soal', $soal->id)
+                      ->where('tipe', 'essay')->exists();
+      ?>
+      @if($ada_essay)
+      <div style="margin-bottom: 15px">
+        <a href="{{ url('/essay/koreksi/'.$soal->id) }}" class="btn btn-warning">
+          <i class="fa fa-pencil-square-o"></i> Koreksi Esai
+        </a>
+      </div>
+      @endif
       <table class="table table-bordered" id="tabelsoal">
         <thead>
           <tr>

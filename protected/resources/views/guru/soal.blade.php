@@ -313,7 +313,7 @@
 
       <div id="wrap-user" class="table-responsive">
         <table class="table table-bordered table-striped table-hover table-condensed" id="tabelsoal">
-          <thead>
+	 <thead>
             <tr>
               <th style="width: 50px">#</th>
               <th style="text-align: center;">ID <small>Soal</small></th>
@@ -323,6 +323,7 @@
               <th>KKM</th>
               <th>Waktu</th>
               <th>Tgl Dibuat</th>
+              <th style="width: 90px; text-align: center;">Laporan</th>
               <th style="width: 160px; text-align: center;">Aksi</th>
             </tr>
           </thead>
@@ -353,7 +354,10 @@
               <td>{{ $soal->deskripsi }}</td>
               <td>{{ $soal->kkm }}</td>
               <td>{{ $soal->waktu/60 }} menit</td>
-              <td>{{ $tanggal }}</td>
+	      <td>{{ $tanggal }}</td>
+              <td style="text-align: center;">
+                <a href="{{ url('/detail-hasil/'.$soal->id) }}" class="btn btn-xs btn-info" data-toggle='tooltip' title="Lihat Laporan Paket Soal"><i class="fa fa-bar-chart"></i> Laporan</a>
+              </td>
               <td style="text-align: center;">
                 <a href="{{ url('/edit-soal/'.$soal->id) }}" class="btn btn-xs btn-success" data-toggle='tooltip' title="Ubah Soal"><i class="fa fa-pencil-square-o"></i></a>
                 <a href="{{ url('/duplicate-soal/'.$soal->id) }}" class="btn btn-xs btn-success" data-toggle='tooltip' title="Duplikat Soal"><i class="fa fa fa-cubes"></i></a>
@@ -363,7 +367,7 @@
             </tr>
             @endforeach
             @else
-            <tr><td colspan="9" class="alert alert-danger">Belum ada data untuk ditampilkan.</td></tr>
+            <tr><td colspan="10" class="alert alert-danger">Belum ada data untuk ditampilkan.</td></tr>
             @endif
           </tbody>
         </table>
