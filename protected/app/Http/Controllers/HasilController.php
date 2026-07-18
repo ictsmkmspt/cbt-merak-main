@@ -24,6 +24,9 @@ use App\Aktifitas;
 use App\Soal;
 use App\Detailsoal;
 use App\Distribusisoal;
+use App\Countexamtime;
+use DB;
+use Carbon\Carbon;
 
 class HasilController extends Controller
 {
@@ -39,16 +42,23 @@ class HasilController extends Controller
       $user = User::where('email', '=', Auth::user()->email)->first();
       $kelas = Kelas::orderby('nama', 'asc')->get();
       $id_user = Auth::user()->id;
-      if (Auth::user()->status == "A") {
-        $jawabs = Jawab::join('soals', 'jawabs.id_soal', '=', 'soals.id')
-                      ->select(['jawabs.*', 'soals.paket', 'soals.deskripsi', 'soals.kkm', 'soals.waktu'])
-                      ->groupby('jawabs.id_soal')->paginate(30);
-      }else{
-        $jawabs = Jawab::join('soals', 'jawabs.id_soal', '=', 'soals.id')
-                      ->select(['jawabs.*', 'soals.paket', 'soals.deskripsi', 'soals.kkm', 'soals.waktu'])
-                      ->where('soals.id_user', Auth::user()->id)
-                      ->groupby('jawabs.id_soal')->paginate(30);
+
+      // Kumpulkan id_soal yang punya jawaban ATAU sedang dikerjakan (countexamtimes).
+      // Tidak pakai whereExists karena ada bug di vendor Laravel 5.1 project ini
+      // (compact('operator') dengan variabel yang tidak pernah didefinisikan).
+      $idSoalJawab  = DB::table('jawabs')->distinct()->lists('id_soal');
+      $idSoalAktif  = DB::table('countexamtimes')->distinct()->lists('id_soal');
+      $idSoalDilaporkan = array_values(array_unique(array_merge($idSoalJawab, $idSoalAktif)));
+
+      $query = Soal::select('soals.*', DB::raw('soals.id as id_soal'))
+                    ->whereIn('soals.id', $idSoalDilaporkan);
+
+      if (Auth::user()->status == "G") {
+        $query->where('soals.id_user', Auth::user()->id);
       }
+
+      $jawabs = $query->orderBy('soals.id', 'desc')->paginate(30);
+
       if (Auth::user()->status == "A"){
         $soals = Soal::paginate(30);
       }elseif (Auth::user()->status == "G") {
@@ -65,16 +75,21 @@ class HasilController extends Controller
       $user = User::where('id', '=', Auth::user()->id)->first();
       $q = Input::get('q');
       $id_user = Auth::user()->id;
-      if (Auth::user()->status == "A"){
-        $jawabs = Jawab::join('soals', 'jawabs.id_soal', '=', 'soals.id')
-                      ->select(['jawabs.*', 'soals.paket', 'soals.deskripsi', 'soals.kkm', 'soals.waktu'])
-                      ->where('soals.paket', 'LIKE', '%'.$q.'%')->groupby('jawabs.id_soal')->paginate(15);
-      }elseif (Auth::user()->status == "G") {
-        $jawabs = Jawab::join('soals', 'jawabs.id_soal', '=', 'soals.id')
-                      ->select(['jawabs.*', 'soals.paket', 'soals.deskripsi', 'soals.kkm', 'soals.waktu'])
-                      ->where('soals.paket', 'LIKE', '%'.$q.'%')->where('soals.id_user', Auth::user()->id)
-                      ->groupby('jawabs.id_soal')->paginate(15);
+
+      $idSoalJawab  = DB::table('jawabs')->distinct()->lists('id_soal');
+      $idSoalAktif  = DB::table('countexamtimes')->distinct()->lists('id_soal');
+      $idSoalDilaporkan = array_values(array_unique(array_merge($idSoalJawab, $idSoalAktif)));
+
+      $query = Soal::select('soals.*', DB::raw('soals.id as id_soal'))
+                    ->where('soals.paket', 'LIKE', '%'.$q.'%')
+                    ->whereIn('soals.id', $idSoalDilaporkan);
+
+      if (Auth::user()->status == "G") {
+        $query->where('soals.id_user', Auth::user()->id);
       }
+
+      $jawabs = $query->orderBy('soals.id', 'desc')->paginate(15);
+
       return view('guru.ajax.get_hasil_guru', compact('jawabs', 'user'));
     }else{
       return redirect('siswa');
@@ -147,7 +162,7 @@ class HasilController extends Controller
     })->export('xls');
   }
 
-  public function detailhasilsoal($id, $id_soal)
+ public function detailhasilsoal($id, $id_soal)
   {
     if (Auth::user()->status == "G" or Auth::user()->status == "A") {
       $school = School::first();
@@ -159,6 +174,35 @@ class HasilController extends Controller
       $prosentasejawabs = Jawab::where('id_kelas', $id)->where('id_soal', $id_soal)->groupBy('no_soal_id')->get();
       
       return view('guru.detailhasilsoal', compact('user', 'school', 'soal', 'kelas', 'jawabs', 'prosentasejawabs'));
+    }else{
+      return redirect('siswa');
+    }
+  }
+
+  // Guru/Admin memaksa hentikan ujian siswa yang sedang berlangsung (status jawaban masih 'N')
+  public function hentikanUjianSiswa()
+  {
+    if (Auth::user()->status == "G" or Auth::user()->status == "A") {
+      $id_soal = Input::get('id_soal');
+      $id_user = Input::get('id_user');
+
+      // finalisasi paksa semua jawaban siswa untuk soal ini (sama seperti saat waktu habis)
+      $jawabs = Jawab::where('id_soal', $id_soal)->where('id_user', $id_user)->get();
+      foreach ($jawabs as $j) {
+        if ($j->status == 'Y') continue;
+        $j->status = 'Y';
+        $j->save();
+      }
+
+      // set waktu_selesai ke masa lalu, supaya kalau tab siswa masih terbuka,
+      // polling timer (tiap 5 detik) langsung mendeteksi status 'habis' dan auto-submit
+      $cek = Countexamtime::where('id_soal', $id_soal)->where('id_user', $id_user)->first();
+      if ($cek) {
+        $cek->waktu_selesai = Carbon::now()->subSecond();
+        $cek->save();
+      }
+
+      return response()->json(['status' => 'ok']);
     }else{
       return redirect('siswa');
     }

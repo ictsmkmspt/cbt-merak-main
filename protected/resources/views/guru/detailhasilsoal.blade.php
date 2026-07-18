@@ -22,13 +22,14 @@
     <div class="panel-heading">Detail Ujian Kelas <b>{{$kelas->nama}}</b> Paket Soal <b>{{$soal->paket}}</b></div>
     <div class="panel-body">
       <div class="alert alert-info" role="alert"><b><i class="fa fa-info-circle"></i> Info: </b>Dibawah ini detail siswa kelas {{$kelas->nama}} yang telah mengerjakan paket soal <b>{{$soal->paket}}</b></div>
-      <table class="table table-bordered table-hover table-condensed" id="tabelsoal">
+	<table class="table table-bordered table-hover table-condensed" id="tabelsoal">
         <thead>
           <tr>
             <th>No</th>
             <th>Nama</th>
             <th>Nilai</th>
-            <th width="170px">Aksi</th>
+            <th width="120px">Status</th>
+            <th width="220px">Aksi</th>
           </tr>
         @if($jawabs->count())
         <?php $no = 1; ?>
@@ -41,6 +42,12 @@
           {
             $nilai = $row['total'];
           }
+          // status: kalau masih ada jawaban dengan status 'N', berarti siswa masih mengerjakan
+          $sqlstatus = "SELECT COUNT(*) as belum FROM jawabs WHERE id_kelas='$jawab->id_kelas' AND id_soal='$jawab->id_soal' AND id_user='$jawab->id_user' AND status='N'";
+          $datastatus = $conn->query($sqlstatus);
+          $rowstatus = mysqli_fetch_assoc($datastatus);
+          $sedangUjian = ($rowstatus['belum'] > 0);
+
           $sql = "SELECT id, nama FROM users WHERE id='$id_user'";
           $result = $conn->query($sql);
           if ($result->num_rows > 0) {
@@ -58,12 +65,27 @@
             <td>{{ $row['nama'] }}</td>
             <td width="70px" align="center"><?= $nilai; ?></td>
             <td align="center">
+              <?php if ($sedangUjian) { ?>
+                <span class="label label-warning">Sedang Ujian</span>
+              <?php } else { ?>
+                <span class="label label-success">Sudah Selesai</span>
+              <?php } ?>
+            </td>
+            <td align="center">
               <a href="#" id="btndetail{{$jawab->id_user}}" 
                 class="btn btn-xs btn-primary"  
                 data-toggle="tooltip" 
                 title="Detail rekap ujian per kelas.">
                 <i class="fa fa-search"></i> Detail
               </a> | 
+              <?php if ($sedangUjian) { ?>
+              <a href="#" id="btnhentikan{{$jawab->id_user}}" 
+                class="btn btn-xs btn-warning" 
+                data-toggle="tooltip" 
+                title="Menghentikan ujian siswa ini sekarang dan menyimpan jawaban yang sudah dikerjakan.">
+                <i class="fa fa-stop"></i> Hentikan Ujian
+              </a> | 
+              <?php } ?>
               <a href="#" id="btnhapus{{$jawab->id_user}}" 
                 class="btn btn-xs btn-danger" 
                 data-toggle="tooltip" 
@@ -73,7 +95,7 @@
             </td>
           </tr>
           <tr id="detail{{$jawab->id_user}}">
-            <td colspan="4"><table class="table table-condensed table-bordered table-hover table-striped">
+            <td colspan="5"><table class="table table-condensed table-bordered table-hover table-striped">
                 <thead>
                   <tr>
                     <th>No</th>
@@ -120,7 +142,7 @@
             </td>
           </tr>
           <tr id="notifdel{{ $jawab->id_user }}">
-            <td colspan="4" class="alert alert-danger">Data diatas berhasil dihapus. <i>Refresh</i> halaman untuk melihat perubahannya.</td>
+            <td colspan="5" class="alert alert-danger">Data diatas berhasil dihapus. <i>Refresh</i> halaman untuk melihat perubahannya.</td>
           </tr>
           <script type="text/javascript">
             $(document).ready(function() {
@@ -143,6 +165,22 @@
                   data: datastring,
                   success: function(data){
                     $("#notifdel{{ $jawab->id_user }}").show();
+                  }
+                });
+              });
+
+              $("#btnhentikan{{$jawab->id_user}}").click(function() {
+                if (!confirm('Yakin akan menghentikan ujian siswa ini sekarang? Jawaban yang sudah dikerjakan akan disimpan sebagai jawaban final.')) return false;
+                var btn = $(this);
+                var id_soal = $("#is{{ $jawab->id_soal }}").val();
+                var id_user = $("#iu{{ $jawab->id_user }}").val();
+                $.ajax({
+                  type: "POST",
+                  url: "{{ url('/hentikan-ujian-siswa') }}",
+                  data: "id_soal="+id_soal+"&id_user="+id_user,
+                  success: function(data){
+                    alert('Ujian siswa berhasil dihentikan.');
+                    location.reload();
                   }
                 });
               });
