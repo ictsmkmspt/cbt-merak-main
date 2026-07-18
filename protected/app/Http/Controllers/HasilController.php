@@ -207,5 +207,33 @@ class HasilController extends Controller
       return redirect('siswa');
     }
   }
+  // Admin menghentikan SEMUA siswa yang sedang mengerjakan soal apapun, sekaligus
+  public function hentikanUjianMassal()
+  {
+    if (Auth::user()->status == "A") {
+      // Ambil semua kombinasi id_soal + id_user yang statusnya masih 'N' (sedang mengerjakan)
+      $sedangUjian = Jawab::where('status', 'N')
+                           ->select('id_soal', 'id_user')
+                           ->distinct()
+                           ->get();
 
+      foreach ($sedangUjian as $item) {
+        // finalisasi paksa jawaban kombinasi ini
+        Jawab::where('id_soal', $item->id_soal)
+             ->where('id_user', $item->id_user)
+             ->where('status', 'N')
+             ->update(['status' => 'Y']);
+
+        // expire-kan waktu di countexamtimes hanya untuk kombinasi yang memang sedang aktif,
+        // supaya siswa lain yang belum pernah mulai soal ini tidak ikut ke-reset timernya
+        Countexamtime::where('id_soal', $item->id_soal)
+                      ->where('id_user', $item->id_user)
+                      ->update(['waktu_selesai' => Carbon::now()->subSecond()]);
+      }
+
+      return response()->json(['status' => 'ok', 'jumlah' => $sedangUjian->count()]);
+    }else{
+      return redirect('siswa');
+    }
+  }
 }

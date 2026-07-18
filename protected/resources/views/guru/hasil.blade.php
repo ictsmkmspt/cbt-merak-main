@@ -18,7 +18,19 @@
   <div class="panel panel-default">
     <div class="panel-heading" style="background: #072047; color: #fff">Laporan</div>
     <div class="panel-body">
-      <div class="alert alert-info" role="alert"><b><i class="fa fa-info-circle"></i> Tips: </b>Dibawah ini daftar paket soal yang telah dikerjakan oleh siswa. Klik Tombol Detail untuk melakukan proses rekap serta melihat statistik jawaban siswa.</div>
+     <div class="alert alert-info" role="alert"><b><i class="fa fa-info-circle"></i> Tips: </b>Dibawah ini daftar paket soal yang telah dikerjakan oleh siswa. Klik Tombol Detail untuk melakukan proses rekap serta melihat statistik jawaban siswa.</div>
+
+      @if(Auth::user()->status == "A")
+      <div style="margin-bottom: 15px">
+        <button type="button" id="btnhentikanmassal" class="btn btn-danger">
+          <i class="fa fa-stop-circle"></i> Hentikan Ujian Massal
+        </button>
+        <span style="color:#888; font-size: 11px; margin-left: 5px;">
+          Menghentikan semua siswa yang sedang mengerjakan soal apapun saat ini, dan menyimpan jawaban mereka sebagai jawaban final.
+        </span>
+      </div>
+      @endif
+
       <hr class="clearfix">
       <div class="form-horizontal" style="margin-bottom: 15px">
         <input type="text" class="form-control" id="q" placeholder="Cari berdasarkan Paket soal (Ketik lalu enter)">
@@ -98,6 +110,24 @@
           }
         });
       }
+    });
+
+    $("#btnhentikanmassal").click(function() {
+      if (!confirm('Yakin akan menghentikan SEMUA siswa yang sedang mengerjakan soal apapun sekarang? Jawaban yang sudah dikerjakan akan disimpan sebagai jawaban final. Tindakan ini tidak bisa dibatalkan.')) return false;
+      var btn = $(this);
+      btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Memproses...');
+      $.ajax({
+        type: "POST",
+        url: "{{ url('/hentikan-ujian-massal') }}",
+        success: function(data){
+          alert('Berhasil menghentikan ' + data.jumlah + ' sesi ujian yang sedang berlangsung.');
+          location.reload();
+        },
+        error: function(){
+          alert('Terjadi kesalahan saat menghentikan ujian massal.');
+          btn.prop('disabled', false).html('<i class="fa fa-stop-circle"></i> Hentikan Ujian Massal');
+        }
+      });
     });
   });
 </script>

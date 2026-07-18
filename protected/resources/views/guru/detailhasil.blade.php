@@ -28,7 +28,7 @@
           </tr>
         </thead>
         <tbody>
-        @if($jawabs->count())
+	@if($jawabs->count())
         @foreach($jawabs as $jawab)
         <tr>
           <td>{{ $jawab->nama_kelas }}</td>
@@ -50,21 +50,21 @@
           <td colspan="2" class="alert alert-danger">Data diatas berhasil dihapus. <i>Refresh</i> halaman untuk melihat perubahannya.</td>
         </tr>        
         @endforeach
+        @else
+        <tr>
+          <td colspan="2" class="text-center" style="color:#a6aab2; padding: 20px;">
+            Belum ada siswa yang selesai menjawab soal ini. Kemungkinan ada siswa yang baru membuka soal tapi belum menjawab pertanyaan apapun.
+          </td>
+        </tr>
         @endif
         </tbody>
       </table>
+      @if($jawabs->count())
       <p>{!! str_replace('/?', '?', $jawabs->render()) !!}</p>
+      @endif
     </div>
   </div>
 </div>
-<script type="text/javascript">
-  $(document).ready(function() {
-      $("#btnhapus{{$jawab->id_user}}").click(function() {
-        console.log("qweqweqwe");
-        return false;
-      });
-  });          
-</script>
 
 <div class="col-sm-12 col-md-4 col-lg-4 dash-right">
   <div class="panel panel-primary">
