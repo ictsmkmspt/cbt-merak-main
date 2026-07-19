@@ -60,6 +60,8 @@ class GuruController extends Controller
                               ->groupby('jawabs.id_soal')->get()->count();
       }
       return view('guru.index', compact('user', 'school', 'aktifitas', 'jumlah_materi', 'jumlah_soal', 'jumlah_laporan'));
+    }elseif (Auth::user()->status == "P") {
+      return redirect('hasil-guru');
     }else{
       return redirect('siswa');
     }
@@ -833,6 +835,7 @@ class GuruController extends Controller
 
           $hapusjawab = Jawab::where('id_soal', '=', $id_soal)->where('id_kelas', '=', $id_kelas)->where('id_user', '=', $id_user)->delete();
           Countexamtime::where('id_soal', $id_soal)->where('id_user', $id_user)->delete();
+          \App\Pelanggaran::where('id_soal', $id_soal)->where('id_user', $id_user)->delete();
 
           return 'berhasil';
       }

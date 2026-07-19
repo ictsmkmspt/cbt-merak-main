@@ -37,17 +37,25 @@
         @foreach($jawabs as $jawab)
         <?php
           $id_user = $jawab->id_user;
+          $belumAdaJawaban = isset($jawab->belum_ada_jawaban) && $jawab->belum_ada_jawaban;
+
           $sql="SELECT sum(score) as total FROM jawabs WHERE id_kelas='$jawab->id_kelas' AND id_soal='$jawab->id_soal' AND id_user='$jawab->id_user'";
           $datatotal = $conn->query($sql);
+          $nilai = 0;
           while ($row = mysqli_fetch_assoc($datatotal))
           {
-            $nilai = $row['total'];
+            $nilai = $row['total'] ? $row['total'] : 0;
           }
-          // status: kalau masih ada jawaban dengan status 'N', berarti siswa masih mengerjakan
-          $sqlstatus = "SELECT COUNT(*) as belum FROM jawabs WHERE id_kelas='$jawab->id_kelas' AND id_soal='$jawab->id_soal' AND id_user='$jawab->id_user' AND status='N'";
-          $datastatus = $conn->query($sqlstatus);
-          $rowstatus = mysqli_fetch_assoc($datastatus);
-          $sedangUjian = ($rowstatus['belum'] > 0);
+          // status: kalau masih ada jawaban dengan status 'N', ATAU belum ada jawaban
+          // sama sekali (baru buka soal), berarti siswa masih mengerjakan
+          if ($belumAdaJawaban) {
+            $sedangUjian = true;
+          } else {
+            $sqlstatus = "SELECT COUNT(*) as belum FROM jawabs WHERE id_kelas='$jawab->id_kelas' AND id_soal='$jawab->id_soal' AND id_user='$jawab->id_user' AND status='N'";
+            $datastatus = $conn->query($sqlstatus);
+            $rowstatus = mysqli_fetch_assoc($datastatus);
+            $sedangUjian = ($rowstatus['belum'] > 0);
+          }
 
           $sqlpelanggaran = "SELECT COUNT(*) as jml FROM pelanggarans WHERE id_soal='$jawab->id_soal' AND id_user='$jawab->id_user'";
           $datapelanggaran = $conn->query($sqlpelanggaran);

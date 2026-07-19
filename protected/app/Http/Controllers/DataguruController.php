@@ -35,14 +35,14 @@ class DataguruController extends Controller
     $user = User::where('email', '=', Auth::user()->email)->first();
     $jawabs = Jawab::where('id_user', Auth::user()->id)->get();
     $kelas = Kelas::orderby('nama', 'asc')->get();
-    $users = User::where('status', 'G')->orderBy('nama', 'ASC')->paginate(15);
+    $users = User::whereIn('status', ['G', 'P'])->orderBy('nama', 'ASC')->paginate(15);
     return view('guru.dataguru', compact('user', 'school', 'jawabs', 'kelas', 'users'));
   }
 
   public function get_user()
   {
     $q = Input::get('q');
-    $users = User::where('status', 'G')->where('nama', 'LIKE', '%'.$q.'%')->orderBy('nama', 'ASC')->paginate(10);
+    $users = User::whereIn('status', ['G', 'P'])->where('nama', 'LIKE', '%'.$q.'%')->orderBy('nama', 'ASC')->paginate(10);
     return view('guru.ajax.get_user', compact('users', 'q'));
   }
 
@@ -55,12 +55,15 @@ class DataguruController extends Controller
                       return "<b>Error:</b> Email yang Anda masukan tidak valid";
                     }else{
                         if (Input::get('jk') != "") {
+                            $role = Input::get('role');
+                            if (!in_array($role, ['G', 'P'])) { $role = 'G'; }
+
                             $user = new User;
                             $user->nama = Input::get('nama');
                             $user->no_induk = Input::get('no_induk');
                             $user->email = Input::get('email');
                             $user->jk = Input::get('jk');
-                            $user->status = "G";
+                            $user->status = $role;
                             $user->password = bcrypt(123456);
                             $user->save();
                             return ('berhasil');

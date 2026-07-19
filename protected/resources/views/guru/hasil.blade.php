@@ -71,9 +71,6 @@
               ?>
               <td>
                 <a href="{{ url('/detail-hasil/'.$jawab->id_soal) }}" class="btn btn-xs btn-primary"><i class="fa fa-search"></i> Detail</a>
-                @if($ada_essay)
-                <a href="{{ url('/essay/koreksi/'.$jawab->id_soal) }}" class="btn btn-xs btn-warning"><i class="fa fa-pencil-square-o"></i> Koreksi</a>
-                @endif
               </td>
             </tr>
             @endforeach

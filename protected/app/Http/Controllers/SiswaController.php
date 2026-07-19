@@ -139,10 +139,9 @@ class SiswaController extends Controller
         
           // halt tidak bebas admin sekolah
           if (!$this->bebasAdmin()) { return redirect('bebasadmin');}
-
-          $distribusisoal = Distribusisoal::join('soals', 'distribusisoals.id_soal', '=', 'soals.id')
-                                        ->select('soals.paket', 'soals.deskripsi', 'soals.kkm', 'soals.id as id_soal', 'distribusisoals.*')
-                                        ->where('distribusisoals.id_kelas', Auth::user()->id_kelas)->get();                              
+	    $distribusisoal = Distribusisoal::join('soals', 'distribusisoals.id_soal', '=', 'soals.id')
+                                        ->select('soals.paket', 'soals.deskripsi', 'soals.kkm', 'soals.waktu', 'soals.id as id_soal', 'distribusisoals.*')
+                                        ->where('distribusisoals.id_kelas', Auth::user()->id_kelas)->get();
           // meztr : warning unused variable $soals
           // $soals = Soal::all();
           // return view('siswa.soal', compact('user', 'school', 'soals', 'distribusisoal'));
@@ -415,6 +414,32 @@ class SiswaController extends Controller
     $cek_jawaban = Jawab::where('id_soal', $id_soal)
                           ->where('id_user', $id_user)
                           ->get();
+
+    if ($cek_jawaban->count() == 0) {
+      // Siswa tidak menjawab satupun soal. Tetap buat baris jawaban kosong
+      // untuk tiap butir soal, supaya ujian tercatat SELESAI dengan nilai 0,
+      // bukan hilang tanpa jejak.
+      $user_siswa  = User::where('id', $id_user)->first();
+      $detailsoals = Detailsoal::where('id_soal', $id_soal)->get();
+
+      foreach ($detailsoals as $ds) {
+        $query = new Jawab;
+        $query->no_soal_id = $ds->id;
+        $query->id_soal    = $id_soal;
+        $query->id_user    = $id_user;
+        $query->id_kelas   = $user_siswa ? $user_siswa->id_kelas : null;
+        $query->nama       = $user_siswa ? $user_siswa->nama : '';
+        $query->pilihan    = '-';
+        $query->score      = 0;
+        $query->status     = 'Y';
+        if ($karena_waktu_habis) {
+          $query->status_habis_waktu = 'Y';
+        }
+        $query->save();
+      }
+      return;
+    }
+
     foreach ($cek_jawaban as $value) {
       if ($value->status == 'Y') continue; // sudah pernah difinalisasi, jangan diulang
       $value->status = 'Y';

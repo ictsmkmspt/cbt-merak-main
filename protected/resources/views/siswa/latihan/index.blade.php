@@ -5,41 +5,93 @@
   <li class="active">Latihan</li>
 @endsection
 @section('content')
-@if(session('info_latihan'))
-  <div class="alert alert-info alert-dismissible" role="alert" style="margin-bottom: 20px;">
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-    {{ session('info_latihan') }}
-  </div>
-@endif
-<div class="row">
+<style>
+.latihan-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+.latihan-card {
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 14px rgba(30,58,138,.06);
+  overflow: hidden;
+  transition: all .22s ease;
+  border-bottom: 3px solid #1d4ed8;
+  display: flex; flex-direction: column;
+}
+.latihan-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 28px rgba(30,58,138,.13);
+}
+.latihan-thumb {
+  height: 140px; overflow: hidden;
+  background: #dbeafe;
+  display: flex; align-items: center; justify-content: center;
+}
+.latihan-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.latihan-thumb-placeholder { font-size: 40px; }
+.latihan-body { padding: 20px 20px 18px; flex: 1; display: flex; flex-direction: column; }
+.latihan-title {
+  font-size: 15px; font-weight: 700; color: #1e3a8a;
+  margin-bottom: 8px;
+}
+.latihan-title a { color: #1e3a8a; text-decoration: none; }
+.latihan-title a:hover { color: #1d4ed8; }
+.latihan-excerpt {
+  font-size: 12.5px; color: #94a3b8; line-height: 1.6;
+  flex: 1; margin-bottom: 14px;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.latihan-btn {
+  display: inline-block; text-align: center;
+  background: #dbeafe; color: #1e3a8a !important;
+  font-size: 12.5px; font-weight: 700;
+  border-radius: 10px; padding: 9px 0;
+  text-decoration: none !important;
+  transition: background .2s ease;
+}
+.latihan-btn:hover { background: #bfdbfe; }
+
+@media (max-width: 768px) {
+  .latihan-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .latihan-thumb { height: 85px; }
+  .latihan-thumb-placeholder { font-size: 26px; }
+  .latihan-body { padding: 12px 12px 10px; }
+  .latihan-title { font-size: 12px; margin-bottom: 5px; }
+  .latihan-excerpt { font-size: 10.5px; margin-bottom: 10px; -webkit-line-clamp: 2; }
+  .latihan-btn { font-size: 10.5px; padding: 7px 0; }
+}
+</style>
+
+<div class="latihan-grid">
   @if($materis->count())
   @foreach($materis as $materi)
-  <div class="col-md-6 col-sm-12" style="margin-bottom: 20px;">
-    <div class="card" style="height: 100%;">
-      <div class="card-header bg-white center">
-        <h4 class="card-title"><a href="{{ url('/latihan/read/'.$materi->id.'/'.str_slug($materi->judul)) }}">{{ $materi->judul }}</a></h4>
+  <div class="latihan-card">
+    <?php if ($materi->gambar != "") { ?>
+      <div class="latihan-thumb">
+        <img src="{{ url('/img/materi/'.$materi->gambar) }}" alt="img">
       </div>
-      <a href="take-course.html">
-      <?php if ($materi->gambar != "") { ?>
-        <div style="overflow: hidden; height: 150px">
-          <img src="{{ url('/img/materi/'.$materi->gambar) }}" alt="img">
-        </div>
-      <?php } ?>
-      </a>
-      <div class="card-block">
-        <p class="m-b-0">
-          <?php
-            $isi = str_replace('<div', '<p', $materi->isi);
-            $isi = str_replace('</div', '</p', $isi);
-            $isi = substr($materi->isi, 0, 180);
-            echo $isi;
-          ?>
-        </p>
-        <p><span class="label label-primary"></span></p>
+    <?php } else { ?>
+      <div class="latihan-thumb"><span class="latihan-thumb-placeholder">📖</span></div>
+    <?php } ?>
+    <div class="latihan-body">
+      <div class="latihan-title"><a href="{{ url('/latihan/read/'.$materi->id.'/'.str_slug($materi->judul)) }}">{{ $materi->judul }}</a></div>
+      <div class="latihan-excerpt">
+        <?php
+          $isi = strip_tags($materi->isi);
+          echo \Illuminate\Support\Str::limit($isi, 110);
+        ?>
       </div>
+      <a href="{{ url('/latihan/read/'.$materi->id.'/'.str_slug($materi->judul)) }}" class="latihan-btn">Baca Materi &amp; Latihan →</a>
     </div>
   </div>
   @endforeach
+  @else
+  <div class="alert alert-info" style="grid-column: 1 / -1;">
+    <i class="fa fa-info-circle"></i> Belum ada materi latihan tersedia.
+  </div>
   @endif
 </div>
 @endsection

@@ -55,6 +55,15 @@
                 </div>
               </div>
               <div class="form-group">
+                <label for="inputRole" class="col-sm-2 control-label">Role</label>
+                <div class="col-sm-10">
+                  <select name="role" id="role" class="form-control">
+                    <option value="G">Guru</option>
+                    <option value="P">Pengawas (hanya akses menu Laporan)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
                   <button type="submit" class="btn btn-primary" id="btnsimpan">Simpan</button>
                   <img src="img/ajax-loader.gif" alt="Loading" id="loading">
@@ -80,7 +89,8 @@
               <th>Nama</th>
               <th>NIP</th>
               <th>Email</th>
-              <th>J.Kelamin</th>
+	      <th>J.Kelamin</th>
+              <th>Role</th>
               <th width="50px" style="text-align: center;">Aksi</th>
             </tr>
           </thead>
@@ -101,13 +111,14 @@
               <td>{{ $data->no_induk }}</td>
               <td>{{ $data->email }}</td>
               <td>{{ $jk }}</td>
+              <td>{{ $data->status == 'P' ? 'Pengawas' : 'Guru' }}</td>
               <td style="text-align: center;">
                 <a href="{{ url('/detail-guru/'.$data->id) }}" class="btn btn-primary btn-xs" title="Detail">Detail</a>
               </td>
             </tr>
             @endforeach
             @else
-            <tr><td colspan="6" class="alert alert-danger">Belum ada data untuk ditampilkan.</td></tr>
+            <tr><td colspan="7" class="alert alert-danger">Belum ada data untuk ditampilkan.</td></tr>
             @endif
           </tbody>
         </table>
@@ -153,10 +164,11 @@
       var nama = $("#nama").val();
       var no_induk = $("#no_induk").val();
       var email = $("#email").val();
-      var jk = $("#jk").val();
       var id_kelas = $("#id_kelas").val();
-
-      var datastring = "nama="+nama+"&no_induk="+no_induk+"&email="+email+"&jk="+jk;
+      var jk = $("#jk").val();
+      var role = $("#role").val();
+      var datastring = "nama="+nama+"&no_induk="+no_induk+"&email="+email+"&jk="+jk+"&role="+role;
+      
       $.ajax({
         type: "POST",
         url: "{{ url('/simpanformguru') }}",

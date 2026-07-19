@@ -44,29 +44,47 @@ class EssayController extends Controller
     // Daftar siswa yang sudah submit untuk 1 paket soal
     public function koreksi($id_soal)
     {
-        if (Auth::user()->status == 'S') return redirect('siswa');
+        if (Auth::user()->status == 'S' or Auth::user()->status == 'P') return redirect('hasil-guru');
         $school = School::first();
         $user   = User::find(Auth::user()->id);
         $soal   = Soal::find($id_soal);
 
-        $siswa_list = Jawab::where('id_soal', $id_soal)
-                           ->where('status', 'Y')
-                           ->select('id_user', 'nama', 'id_kelas')
-                           ->groupBy('id_user', 'nama', 'id_kelas')
-                           ->get()
-                           ->map(function($s) use ($id_soal) {
-                               $total_essay   = Jawab::where('id_soal', $id_soal)
-                                                     ->where('id_user', $s->id_user)
-                                                     ->where('pilihan', '-')->count();
-                               $sudah_koreksi = Jawab::where('id_soal', $id_soal)
-                                                     ->where('id_user', $s->id_user)
-                                                     ->where('status_koreksi', 'sudah')->count();
-                               $s->total_essay   = $total_essay;
-                               $s->sudah_koreksi = $sudah_koreksi;
-                               return $s;
-                           });
+        $id_kelas_filter = Input::get('kelas');
 
-        return view('guru.essay_koreksi', compact('soal', 'siswa_list', 'user', 'school'));
+        $query = Jawab::join('kelas', 'jawabs.id_kelas', '=', 'kelas.id')
+                       ->where('jawabs.id_soal', $id_soal)
+                       ->where('jawabs.status', 'Y')
+                       ->select('jawabs.id_user', 'jawabs.nama', 'jawabs.id_kelas', 'kelas.nama as nama_kelas')
+                       ->groupBy('jawabs.id_user', 'jawabs.nama', 'jawabs.id_kelas', 'kelas.nama');
+
+        if ($id_kelas_filter) {
+            $query->where('jawabs.id_kelas', $id_kelas_filter);
+        }
+
+        $siswa_list = $query->orderBy('kelas.nama', 'asc')->orderBy('jawabs.nama', 'asc')
+                             ->get()
+                             ->map(function($s) use ($id_soal) {
+                                 $total_essay   = Jawab::where('id_soal', $id_soal)
+                                                       ->where('id_user', $s->id_user)
+                                                       ->where('pilihan', '-')->count();
+                                 $sudah_koreksi = Jawab::where('id_soal', $id_soal)
+                                                       ->where('id_user', $s->id_user)
+                                                       ->where('status_koreksi', 'sudah')->count();
+                                 $s->total_essay   = $total_essay;
+                                 $s->sudah_koreksi = $sudah_koreksi;
+                                 return $s;
+                             });
+
+        // Daftar kelas untuk dropdown filter (hanya kelas yang punya siswa di paket soal ini)
+        $daftar_kelas = Jawab::join('kelas', 'jawabs.id_kelas', '=', 'kelas.id')
+                              ->where('jawabs.id_soal', $id_soal)
+                              ->where('jawabs.status', 'Y')
+                              ->select('kelas.id', 'kelas.nama')
+                              ->distinct()
+                              ->orderBy('kelas.nama', 'asc')
+                              ->get();
+
+        return view('guru.essay_koreksi', compact('soal', 'siswa_list', 'user', 'school', 'daftar_kelas', 'id_kelas_filter'));
     }
 
     // Form koreksi per siswa

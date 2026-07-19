@@ -30,6 +30,7 @@
         $ada_essay = \App\Detailsoal::where('id_soal', $soal->id)
                       ->where('tipe', 'essay')->exists();
       ?>
+      @if(Auth::user()->status != "P")
       <div style="margin-bottom: 15px">
         @if($ada_essay)
         <a href="{{ url('/essay/koreksi/'.$soal->id) }}" class="btn btn-warning">
@@ -47,6 +48,7 @@
           @endif
         @endif
       </div>
+      @endif
       <table class="table table-bordered" id="tabelsoal">
         <thead>
           <tr>
@@ -86,9 +88,7 @@
         @endif
         </tbody>
       </table>
-      @if($jawabs->count())
-      <p>{!! str_replace('/?', '?', $jawabs->render()) !!}</p>
-      @endif
+      
     </div>
   </div>
 </div>

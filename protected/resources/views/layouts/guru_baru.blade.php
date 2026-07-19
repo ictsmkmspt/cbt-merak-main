@@ -469,6 +469,13 @@ label, .control-label { color: var(--judul); font-weight: 600; font-size: 12.5px
         <!-- ################# MAIN MENU ################### -->
 
         <div class="tab-pane active" id="mainmenu">
+        @if(Auth::user()->status == "P")
+          <ul class="nav nav-pills nav-stacked nav-quirk">
+            <li><span class="nav-header">Menu</span></li>
+            <li <?php if ($url == 'hasil-guru' or $url == 'detail-hasil' or $url == 'detail-hasil-soal') { echo "class='active'"; } ?>><a href="{{ url('/hasil-guru') }}"><i class="fa fa-bar-chart"></i> <span>Laporan</span></a></li>
+            <li><a href="{{ url('/auth/logout') }}"><i class="fa fa-sign-out"></i> Logout</a></li>
+          </ul>
+        @else
           <ul class="nav nav-pills nav-stacked nav-quirk">
             <li><span class="nav-header">Menu</span></li>
             <li <?php if ($url == 'guru') { echo "class='active'"; } ?>><a href="{{ url('/guru') }}"><i class="fa fa-home"></i> <span>Dashboard</span></a></li>
@@ -497,14 +504,14 @@ label, .control-label { color: var(--judul); font-weight: 600; font-size: 12.5px
                 
               </ul>
             </li>
- @if(Auth::user()->status=="A")
+	    @if(Auth::user()->status=="A")
             <li class="nav-parent <?php if ($url == 'arsip-kelas' or $url == 'arsip-siswa') { echo " active"; } ?>"><a href=""><i class="fa fa-archive"></i> <span>Arsip</span></a>
               <ul class="children">
                 <li <?php if ($url == 'arsip-kelas') { echo "class='active'"; } ?>><a href="{{ url('/arsip-kelas') }}"><i class="fa fa-building"></i> Arsip Kelas</a></li>
                 <li <?php if ($url == 'arsip-siswa') { echo "class='active'"; } ?>><a href="{{ url('/arsip-siswa') }}"><i class="fa fa-user"></i> Arsip Siswa</a></li>
               </ul>
             </li>
-@endif
+	    @endif
 
       
 
@@ -513,6 +520,7 @@ label, .control-label { color: var(--judul); font-weight: 600; font-size: 12.5px
             
             <li><a href="{{ url('/auth/logout') }}"><i class="fa fa-sign-out"></i> Logout</a></li>
           </ul>
+        @endif
         </div><!-- tab-pane -->
       </div><!-- tab-content -->
     </div><!-- leftpanelinner -->

@@ -85,6 +85,10 @@ class AuthController extends Controller
         $user->save();
         Session::put('current_token', $token);
 
+        if ($user->status == 'P') {
+            return redirect('/hasil-guru');
+        }
+
         return redirect()->intended($this->redirectPath());
     }
 }

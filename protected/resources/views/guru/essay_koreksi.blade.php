@@ -1,7 +1,6 @@
 @extends('layouts/guru_baru')
 @section('title', 'Koreksi Essay - Daftar Siswa')
 @section('content')
-<?php include(app_path().'/functions/koneksi.php'); ?>
 
 <div class="col-md-12 dash-left">
   <ol class="breadcrumb">
@@ -28,6 +27,19 @@
         Status <span class="label label-success">Selesai</span> berarti semua soal essay sudah dikoreksi.
       </div>
 
+      <form method="GET" action="{{ url('/essay/koreksi/'.$soal->id) }}" class="form-inline" style="margin-bottom: 15px;">
+        <label style="margin-right: 8px;">Filter Kelas:</label>
+        <select name="kelas" class="form-control" onchange="this.form.submit()">
+          <option value="">-- Semua Kelas --</option>
+          @foreach($daftar_kelas as $k)
+            <option value="{{ $k->id }}" {{ $id_kelas_filter == $k->id ? 'selected' : '' }}>{{ $k->nama }}</option>
+          @endforeach
+        </select>
+        @if($id_kelas_filter)
+          <a href="{{ url('/essay/koreksi/'.$soal->id) }}" class="btn btn-default" style="margin-left: 8px;">Reset Filter</a>
+        @endif
+      </form>
+
       <div class="table-responsive">
         <table class="table table-bordered table-hover">
           <thead>
@@ -45,21 +57,12 @@
             <?php $no = 1; ?>
             @foreach($siswa_list as $siswa)
             <?php
-              // Ambil nama kelas
-              $conn2 = new mysqli($hostdb, $userdb, $passdb, $namedb);
-              $rk = $conn2->query("SELECT nama FROM kelas WHERE id='".$siswa->id_kelas."' LIMIT 1");
-              $nama_kelas = '-';
-              if ($rk && $rk->num_rows > 0) {
-                $rowk = $rk->fetch_assoc();
-                $nama_kelas = $rowk['nama'];
-              }
-              $conn2->close();
               $selesai = ($siswa->sudah_koreksi >= $siswa->total_essay && $siswa->total_essay > 0);
             ?>
             <tr>
               <td>{{ $no++ }}</td>
               <td><b>{{ $siswa->nama }}</b></td>
-              <td>{{ $nama_kelas }}</td>
+              <td>{{ $siswa->nama_kelas }}</td>
               <td style="text-align:center">
                 <span class="label label-info">{{ $siswa->total_essay }} soal</span>
               </td>
