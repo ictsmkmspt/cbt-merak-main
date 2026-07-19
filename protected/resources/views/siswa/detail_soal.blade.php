@@ -388,8 +388,20 @@ jQuery.noConflict()(function ($) {
       setInterval(cekWaktuServer, 5000);
 
       // begitu tab aktif lagi (misal siswa balik dari tab lain), langsung cek ulang
+      function kirimLogPelanggaran(jenis){
+        var id_soal = $("#id_soal{{ $detailsoal->id }}").val();
+        $.ajax({
+          url: "{{ url('/log-pelanggaran') }}",
+          type: 'POST',
+          data: 'id_soal='+id_soal+'&jenis='+jenis
+        });
+      }
+
+      // begitu tab aktif lagi (misal siswa balik dari tab lain), langsung cek ulang
       document.addEventListener('visibilitychange', function(){
-        if (!document.hidden) {
+        if (document.hidden) {
+          kirimLogPelanggaran('keluar_tab');
+        } else {
           cekWaktuServer();
         }
       });
@@ -409,14 +421,11 @@ jQuery.noConflict()(function ($) {
     }
    
     $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange', function(e){
-      // if (!window.screenTop && !window.screenY) {
-      //   $("#wrap_soal").show();
-      //   console.log('not fullscreen');
-      // } else {
-      //   $("#wrap_soal").hide();
-      //   console.log('fullscreen');
-      // }
       $("#wrap_soal").show();
+      var isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
+      if (!isFullscreen && $(".wrap_ujian").is(':visible')) {
+        kirimLogPelanggaran('keluar_fullscreen');
+      }
     });
 
     function kirimJawaban(otomatis){

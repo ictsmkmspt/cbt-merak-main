@@ -112,6 +112,12 @@
       </div>
     @endif
 
+    @if (session('pesan_logout'))
+      <div class="frm-error">
+        ⚠ {{ session('pesan_logout') }}
+      </div>
+    @endif
+
     <form method="POST" action="{{ url('/auth/login') }}">
       {!! csrf_field() !!}
       <div class="frm-group">

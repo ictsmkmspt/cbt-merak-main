@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\User;
 use Validator;
+use Session;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
@@ -71,4 +72,19 @@ class AuthController extends Controller
      */
     protected $redirectTo = '/guru';
     protected $redirectAfterLogout = '/';
+
+    /**
+     * Dipanggil otomatis setelah login berhasil.
+     * Membuat token sesi baru supaya sesi lama di perangkat lain otomatis
+     * ter-invalidasi (deteksi multi-device / login bersamaan).
+     */
+    protected function authenticated(\Illuminate\Http\Request $request, $user)
+    {
+        $token = str_random(40);
+        $user->current_token = $token;
+        $user->save();
+        Session::put('current_token', $token);
+
+        return redirect()->intended($this->redirectPath());
+    }
 }

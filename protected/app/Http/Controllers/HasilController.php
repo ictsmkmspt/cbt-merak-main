@@ -27,6 +27,7 @@ use App\Soal;
 use App\Detailsoal;
 use App\Distribusisoal;
 use App\Countexamtime;
+use App\Pelanggaran;
 
 class HasilController extends Controller
 {
@@ -164,8 +165,13 @@ class HasilController extends Controller
 
       $jawabs = Jawab::where('id_kelas', $id)->where('id_soal', $id_soal)->groupBy('id_user')->get();
       $prosentasejawabs = Jawab::where('id_kelas', $id)->where('id_soal', $id_soal)->groupBy('no_soal_id')->get();
+
+      $pelanggarans = Pelanggaran::where('id_soal', $id_soal)
+                                  ->orderBy('created_at', 'asc')
+                                  ->get()
+                                  ->groupBy('id_user');
       
-      return view('guru.detailhasilsoal', compact('user', 'school', 'soal', 'kelas', 'jawabs', 'prosentasejawabs'));
+      return view('guru.detailhasilsoal', compact('user', 'school', 'soal', 'kelas', 'jawabs', 'prosentasejawabs', 'pelanggarans'));
     }else{
       return redirect('siswa');
     }

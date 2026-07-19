@@ -19,12 +19,14 @@ use App\Jawab;
 use App\Detailsoal;
 use App\Distribusisoal;
 use App\Countexamtime;
+use App\Pelanggaran;
 
 class SiswaController extends Controller
 {
   public function __construct()
   {
-      $this->middleware('auth');
+    $this->middleware('auth');
+    $this->middleware('singlesession');
   }
 
   public function index()
@@ -540,4 +542,24 @@ class SiswaController extends Controller
 
     return response()->json(['status' => 'jalan', 'sisa_detik' => $sisa_detik]);
   }
+  
+  public function logPelanggaran()
+  {
+    $id_soal = Input::get('id_soal');
+    $jenis   = Input::get('jenis'); // 'keluar_tab' atau 'keluar_fullscreen'
+    $id_user = Auth::user()->id;
+
+    if (!in_array($jenis, ['keluar_tab', 'keluar_fullscreen'])) {
+      return response()->json(['status' => 'invalid'], 400);
+    }
+
+    $log = new Pelanggaran;
+    $log->id_soal = $id_soal;
+    $log->id_user = $id_user;
+    $log->jenis   = $jenis;
+    $log->save();
+
+    return response()->json(['status' => 'ok']);
+  }
+
 }

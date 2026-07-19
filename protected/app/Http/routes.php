@@ -193,6 +193,7 @@ Route::post('/get-materi', 'MateriController@get_materi');
 
 // Route countexamtime
 Route::post('/countexamtime', 'SiswaController@countexamtime');
+Route::post('/log-pelanggaran', 'SiswaController@logPelanggaran');
 
 // Route AJAX refresh panel aktifitas
 Route::get('/ajax/get-aktifitas', 'GuruController@get_aktifitas_ajax');

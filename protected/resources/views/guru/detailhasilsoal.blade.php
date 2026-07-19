@@ -29,6 +29,7 @@
             <th>Nama</th>
             <th>Nilai</th>
             <th width="120px">Status</th>
+            <th width="100px">Pelanggaran</th>
             <th width="220px">Aksi</th>
           </tr>
         @if($jawabs->count())
@@ -47,6 +48,11 @@
           $datastatus = $conn->query($sqlstatus);
           $rowstatus = mysqli_fetch_assoc($datastatus);
           $sedangUjian = ($rowstatus['belum'] > 0);
+
+          $sqlpelanggaran = "SELECT COUNT(*) as jml FROM pelanggarans WHERE id_soal='$jawab->id_soal' AND id_user='$jawab->id_user'";
+          $datapelanggaran = $conn->query($sqlpelanggaran);
+          $rowpelanggaran = mysqli_fetch_assoc($datapelanggaran);
+          $jmlPelanggaran = $rowpelanggaran['jml'];
 
           $sql = "SELECT id, nama FROM users WHERE id='$id_user'";
           $result = $conn->query($sql);
@@ -72,7 +78,14 @@
               <?php } ?>
             </td>
             <td align="center">
-              <a href="#" id="btndetail{{$jawab->id_user}}" 
+              <?php if ($jmlPelanggaran > 0) { ?>
+                <span class="label label-danger" data-toggle="tooltip" title="Klik tombol Detail untuk lihat riwayat">{{ $jmlPelanggaran }}x</span>
+              <?php } else { ?>
+                <span class="label label-default">0</span>
+              <?php } ?>
+            </td>
+            <td align="center">
+              <a href="#" id="btndetail{{$jawab->id_user}}"
                 class="btn btn-xs btn-primary"  
                 data-toggle="tooltip" 
                 title="Detail rekap ujian per kelas.">
@@ -95,7 +108,7 @@
             </td>
           </tr>
           <tr id="detail{{$jawab->id_user}}">
-            <td colspan="5"><table class="table table-condensed table-bordered table-hover table-striped">
+            <td colspan="6"><table class="table table-condensed table-bordered table-hover table-striped">
                 <thead>
                   <tr>
                     <th>No</th>
@@ -139,10 +152,41 @@
                   <?php }} ?>
                 </tbody>
               </table>
+
+              <?php if ($jmlPelanggaran > 0) { ?>
+              <div style="margin-top: 15px;">
+                <b><i class="fa fa-exclamation-triangle text-danger"></i> Riwayat Pelanggaran (<?= $jmlPelanggaran ?>x)</b>
+                <table class="table table-condensed table-bordered" style="margin-top: 5px;">
+                  <thead>
+                    <tr>
+                      <th width="40px">No</th>
+                      <th>Jenis Pelanggaran</th>
+                      <th width="200px">Waktu</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php
+                      $no_p = 1;
+                      $sqlp = "SELECT * FROM pelanggarans WHERE id_soal='$jawab->id_soal' AND id_user='$jawab->id_user' ORDER BY created_at ASC";
+                      $resultp = $conn->query($sqlp);
+                      if ($resultp->num_rows > 0) {
+                        while ($rowp = $resultp->fetch_assoc()) {
+                          $labelJenis = ($rowp['jenis'] == 'keluar_tab') ? 'Keluar Tab' : 'Keluar Fullscreen';
+                    ?>
+                    <tr>
+                      <td><?= $no_p++ ?></td>
+                      <td><span class="label label-danger"><?= $labelJenis ?></span></td>
+                      <td><?= $rowp['created_at'] ?></td>
+                    </tr>
+                    <?php } } ?>
+                  </tbody>
+                </table>
+              </div>
+              <?php } ?>
             </td>
           </tr>
           <tr id="notifdel{{ $jawab->id_user }}">
-            <td colspan="5" class="alert alert-danger">Data diatas berhasil dihapus. <i>Refresh</i> halaman untuk melihat perubahannya.</td>
+            <td colspan="6" class="alert alert-danger">Data diatas berhasil dihapus. <i>Refresh</i> halaman untuk melihat perubahannya.</td>
           </tr>
           <script type="text/javascript">
             $(document).ready(function() {
