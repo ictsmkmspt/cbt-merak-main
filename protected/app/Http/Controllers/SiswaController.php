@@ -474,6 +474,26 @@ class SiswaController extends Controller
         return redirect('guru');
     }
   }
+
+  public function detail_hasil_siswa($id)
+  {
+    if (Auth::user()->status == "S" or Auth::user()->status =="C") {
+      $user = User::where('email', Auth::user()->email)->first();
+      $soal = Soal::where('id', $id)->first();
+      $soals = Soal::where('id', '!=', $id)->get();
+      $idsoal = $id;
+
+      $jawabs = Jawab::join('detailsoals', 'jawabs.no_soal_id', '=', 'detailsoals.id')
+                        ->select('detailsoals.soal', 'detailsoals.kunci', 'detailsoals.pila', 'detailsoals.pilb', 'detailsoals.pilc', 'detailsoals.pild', 'detailsoals.pile', 'jawabs.*')
+                        ->where('jawabs.id_soal', $id)
+                        ->where('jawabs.id_user', Auth::user()->id)
+                        ->get();
+
+      return view('siswa.detail', compact('user', 'idsoal', 'soal', 'soals', 'jawabs'));
+    }else{
+        return redirect('guru');
+    }
+  }
   
 
   public function test()

@@ -34,12 +34,25 @@
           <?php $no = 1; ?>
           @if($jawabs->count())
           @foreach($jawabs as $jawab)
-          <?php $id_soal = $jawab->id_soal; $id_user = Auth::user()->id; ?>
+          <?php
+            $id_soal = $jawab->id_soal; $id_user = Auth::user()->id;
+            $pilihan_map = [
+              'A' => $jawab->pila,
+              'B' => $jawab->pilb,
+              'C' => $jawab->pilc,
+              'D' => $jawab->pild,
+              'E' => $jawab->pile,
+            ];
+            $huruf_kunci  = strtoupper($jawab->kunci);
+            $huruf_pilih  = strtoupper($jawab->pilihan);
+            $teks_kunci   = isset($pilihan_map[$huruf_kunci]) ? $pilihan_map[$huruf_kunci] : $jawab->kunci;
+            $teks_pilihan = isset($pilihan_map[$huruf_pilih]) ? $pilihan_map[$huruf_pilih] : ($jawab->pilihan == '' ? '-' : $jawab->pilihan);
+          ?>
           <tr>
             <td width="40px">{{ $no++ }}</td>
             <td>{!! $jawab->soal !!}</td>
-            <td class="center">{{ $jawab->kunci }}</td>
-            <td class="center">{{ $jawab->pilihan }}</td>
+            <td class="center">{!! $teks_kunci !!}</td>
+            <td class="center">{!! $teks_pilihan !!}</td>
             <td class="center">{{ $jawab->score }}</td>
           </tr>
           @endforeach
