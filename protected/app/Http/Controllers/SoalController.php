@@ -78,9 +78,18 @@ class SoalController extends Controller
     $q = Input::get('q');
     $id_user = Auth::user()->id;
     if (Auth::user()->status == "A"){
-      $soals = Soal::where('paket', 'LIKE', '%'.$q.'%')->paginate(15);
+      $soals = Soal::leftJoin('materis', 'soals.materi', '=', 'materis.id')
+                   ->select('soals.*', 'materis.judul as nama_materi')
+                   ->where('soals.paket', 'LIKE', '%'.$q.'%')
+                   ->orderBy('soals.id', 'desc')
+                   ->paginate(15);
     }elseif (Auth::user()->status == "G") {
-      $soals = Soal::where('paket', 'LIKE', '%'.$q.'%')->where('id_user', $id_user)->paginate(15);
+      $soals = Soal::leftJoin('materis', 'soals.materi', '=', 'materis.id')
+                   ->select('soals.*', 'materis.judul as nama_materi')
+                   ->where('soals.paket', 'LIKE', '%'.$q.'%')
+                   ->where('soals.id_user', $id_user)
+                   ->orderBy('soals.id', 'desc')
+                   ->paginate(15);
     }
     return view('guru.ajax.get_soal_guru', compact('soals', 'user'));
   }
@@ -505,4 +514,58 @@ class SoalController extends Controller
     Soal::where('id', '=', $id)->delete();
      echo  "<script type='text/javascript'> window.close(); </script>";
   }
+
+  // Guru/Admin membagikan (atau menutup) akses latihan ke siswa.
+  // Latihan (jenis=2) TIDAK otomatis tampil ke siswa sampai guru klik tombol ini.
+  public function bagikanLatihan($id)
+  {
+    if (Auth::user()->status == "G" or Auth::user()->status == "A") {
+      $soal = Soal::where('id', $id)->first();
+      if ($soal && $soal->jenis == 2) {
+        $soal->status_bagikan = ($soal->status_bagikan == 'Y') ? 'N' : 'Y';
+        $soal->save();
+
+        $pesan = ($soal->status_bagikan == 'Y')
+                  ? 'Latihan "'.$soal->paket.'" berhasil dibagikan. Siswa sekarang bisa melihat dan mengerjakannya.'
+                  : 'Latihan "'.$soal->paket.'" berhasil ditutup. Siswa tidak akan melihatnya lagi sampai dibagikan ulang.';
+
+        return redirect()->back()->with('info_bagikan', $pesan);
+      }
+      return redirect()->back();
+    }else{
+      return redirect('siswa');
+    }
+  }
+
+  public function generateTokenUjian($id)
+  {
+    if (Auth::user()->status == "G" or Auth::user()->status == "A") {
+      $soal = Soal::where('id', $id)->first();
+      if ($soal) {
+        $token = strtoupper(str_random(6));
+        $soal->token_ujian = $token;
+        $soal->save();
+        return redirect()->back()->with('info_token', 'Token baru untuk "'.$soal->paket.'": '.$token.'. Catat/tampilkan token ini ke siswa sebelum ujian dimulai.');
+      }
+      return redirect()->back();
+    }else{
+      return redirect('siswa');
+    }
+  }
+
+  public function hapusTokenUjian($id)
+  {
+    if (Auth::user()->status == "G" or Auth::user()->status == "A") {
+      $soal = Soal::where('id', $id)->first();
+      if ($soal) {
+        $soal->token_ujian = null;
+        $soal->save();
+        return redirect()->back()->with('info_token', 'Token untuk "'.$soal->paket.'" dihapus. Siswa bisa langsung mengerjakan tanpa token.');
+      }
+      return redirect()->back();
+    }else{
+      return redirect('siswa');
+    }
+  }
+
 }

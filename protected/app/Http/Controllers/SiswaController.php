@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Auth;
 use Input;
+use Session;
 use Validator;
 use File;
 use DB;
@@ -140,7 +141,7 @@ class SiswaController extends Controller
           // halt tidak bebas admin sekolah
           if (!$this->bebasAdmin()) { return redirect('bebasadmin');}
 	    $distribusisoal = Distribusisoal::join('soals', 'distribusisoals.id_soal', '=', 'soals.id')
-                                        ->select('soals.paket', 'soals.deskripsi', 'soals.kkm', 'soals.waktu', 'soals.id as id_soal', 'distribusisoals.*')
+                                        ->select('soals.paket', 'soals.deskripsi', 'soals.kkm', 'soals.waktu', 'soals.token_ujian', 'soals.id as id_soal', 'distribusisoals.*')
                                         ->where('distribusisoals.id_kelas', Auth::user()->id_kelas)->get();
           // meztr : warning unused variable $soals
           // $soals = Soal::all();
@@ -198,9 +199,6 @@ class SiswaController extends Controller
       $soal = Soal::where('id', $id)->first();
 
       // Latihan (jenis = 2) hanya boleh dikerjakan 1 kali.
-      // Dicek dari jawabs.status = 'Y' (sudah difinalisasi lewat "Akhiri Ujian"
-      // atau otomatis saat waktu habis) — bukan sekadar ada baris jawaban,
-      // supaya siswa yang masih di tengah pengerjaan tetap bisa lanjut.
       if ($soal && $soal->jenis == 2) {
         $sudahSelesai = Jawab::where('id_soal', $id)
                               ->where('id_user', $iduser)
@@ -211,6 +209,11 @@ class SiswaController extends Controller
         }
       }
 
+      // Ujian dengan token: siswa harus verifikasi token dulu sebelum masuk soal.
+      if ($soal && $soal->token_ujian && Session::get('token_verified_'.$id) != 'Y') {
+        return redirect('/verifikasi-token/'.$id);
+      }
+
       $soals = Detailsoal::where('id_soal', $id)->orderBy(DB::raw('RAND()'))->get();
       $user = User::where('id', Auth::user()->id)->first();
       $school = School::first();
@@ -219,6 +222,13 @@ class SiswaController extends Controller
                       ->select('soals.paket', 'soals.waktu', 'detailsoals.*')
                       ->where('detailsoals.id_soal', $id)
                       ->orderBy(DB::raw('RAND()'))->first();
+
+      // Soal belum punya butir pertanyaan sama sekali -> jangan tampilkan halaman ujian,
+      // arahkan balik dengan pesan yang jelas.
+      if (!$detailsoal || $soals->count() == 0) {
+        $tujuan = ($soal && $soal->jenis == 2) ? '/latihan' : '/soal-siswa';
+        return redirect($tujuan)->with('info_soal_kosong', 'Paket soal "'.($soal ? $soal->paket : '').'" belum memiliki butir pertanyaan. Hubungi guru untuk melengkapi soal ini.');
+      }
       $jumlah_soal = Detailsoal::where('id_soal', $id)->get();
       // $soal = null;
       $countexamtime = Countexamtime::where('id_soal', $id)->where('id_user', Auth::user()->id)->first();
@@ -585,6 +595,37 @@ class SiswaController extends Controller
     $log->save();
 
     return response()->json(['status' => 'ok']);
+  }
+
+  public function formTokenUjian($id)
+  {
+    if (Auth::user()->status == "S" or Auth::user()->status =="C") {
+      $soal = Soal::where('id', $id)->first();
+      if (!$soal || !$soal->token_ujian) {
+        return redirect('/soal-siswa/'.$id);
+      }
+      if (Session::get('token_verified_'.$id) == 'Y') {
+        return redirect('/soal-siswa/'.$id);
+      }
+      $user = User::where('id', Auth::user()->id)->first();
+      $school = School::first();
+      return view('siswa.token_ujian', compact('soal', 'user', 'school'));
+    }else{
+      return redirect('guru');
+    }
+  }
+
+  public function cekTokenUjian($id)
+  {
+    $soal = Soal::where('id', $id)->first();
+    $input_token = trim(Input::get('token'));
+
+    if ($soal && $soal->token_ujian && strcasecmp($soal->token_ujian, $input_token) == 0) {
+      Session::put('token_verified_'.$id, 'Y');
+      return redirect('/soal-siswa/'.$id);
+    }
+
+    return redirect('/verifikasi-token/'.$id)->with('error_token', 'Token yang Anda masukkan salah. Silakan tanyakan token ujian ke guru/pengawas.');
   }
 
 }

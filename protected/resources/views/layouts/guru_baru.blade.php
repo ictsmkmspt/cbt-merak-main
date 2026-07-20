@@ -492,18 +492,17 @@ label, .control-label { color: var(--judul); font-weight: 600; font-size: 12.5px
               </ul>
             </li>
 
+            @if(Auth::user()->status=="A")
             <li class="nav-parent <?php if ($url == 'data-guru' or $url == 'detail-guru' or $url == 'kelas' or $url == 'detail-kelas' or $url == 'data-siswa' or $url == 'detail-kelas-siswa' or $url == 'iuran-siswa' or $url == 'iuran-bykelas' or $url == 'mapel') { echo " active"; } ?>"><a href=""><i class="fa fa-database"></i> <span>Master Data</span></a>
               <ul class="children">
                 <li <?php if ($url == 'data-guru' or $url == 'detail-guru') { echo "class='active'"; } ?>><a href="{{ url('/data-guru') }}"><i class="fa fa-user"></i> Guru</a></li>
                 <li <?php if ($url == 'kelas' or $url == 'detail-kelas') { echo "class='active'"; } ?>><a href="{{ url('/kelas') }}"><i class="fa fa-building"></i> Kelas</a></li>
                 <li <?php if ($url == 'data-siswa' or $url == 'detail-kelas-siswa') { echo "class='active'"; } ?>><a href="{{ url('/data-siswa') }}"><i class="fa fa-user"></i> Siswa</a></li>
-                @if(Auth::user()->status=="A")
                 <li <?php if ($url == 'iuran-siswa' or $url == 'iuran-bykelas') { echo "class='active'"; } ?>><a href="{{ url('/iuran-siswa') }}"><i class="fa fa-shopping-bag"></i> Iuran</a></li>
                 <li <?php if ($url == 'mapel') { echo "class='active'"; } ?>><a href="{{ url('/mapel') }}"><i class="fa fa-book"></i> Mata Pelajaran</a></li>
-                @endif
-                
               </ul>
             </li>
+            @endif
 	    @if(Auth::user()->status=="A")
             <li class="nav-parent <?php if ($url == 'arsip-kelas' or $url == 'arsip-siswa') { echo " active"; } ?>"><a href=""><i class="fa fa-archive"></i> <span>Arsip</span></a>
               <ul class="children">

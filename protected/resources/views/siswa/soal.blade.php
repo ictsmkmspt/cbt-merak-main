@@ -77,6 +77,12 @@
 }
 </style>
 
+@if(session('info_soal_kosong'))
+<div class="alert alert-warning" style="grid-column: 1 / -1; margin-bottom: 14px;">
+  <i class="fa fa-exclamation-triangle"></i> {{ session('info_soal_kosong') }}
+</div>
+@endif
+
 <div class="ujian-grid">
   @if($distribusisoal->count())
   <?php $adaSoal = false; ?>
@@ -90,7 +96,8 @@
   <div class="ujian-card">
     <div class="ujian-card-body">
       <div class="ujian-icon">📋</div>
-      <div class="ujian-title"><a href="{{ url('/soal-siswa/'.$data_soal->id_soal) }}">{{ $data_soal->paket }}</a></div>
+      <?php $url_mulai = $data_soal->token_ujian ? url('/verifikasi-token/'.$data_soal->id_soal) : url('/soal-siswa/'.$data_soal->id_soal); ?>
+      <div class="ujian-title"><a href="{{ $url_mulai }}">{{ $data_soal->paket }}</a></div>
       <div class="ujian-desc">{{ $data_soal->deskripsi ?: 'Tidak ada deskripsi.' }}</div>
       <div class="ujian-meta">
         @if($data_soal->waktu)
@@ -99,8 +106,13 @@
         @if($data_soal->kkm)
         <span class="ujian-chip">🎯 KKM {{ $data_soal->kkm }}</span>
         @endif
+        @if($data_soal->token_ujian)
+        <span class="ujian-chip">🔒 Perlu token</span>
+        @endif
       </div>
-      <a href="{{ url('/soal-siswa/'.$data_soal->id_soal) }}" class="ujian-btn">Mulai Ujian</a>
+      <a href="{{ $url_mulai }}" class="ujian-btn">
+        @if($data_soal->token_ujian) 🔒 Masukkan Token @else Mulai Ujian @endif
+      </a>
     </div>
   </div>
   <?php } ?>

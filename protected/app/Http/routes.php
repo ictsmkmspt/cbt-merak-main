@@ -130,6 +130,9 @@ Route::get('detail-hasil-soal/{id}/{id_soal}', 'HasilController@detailhasilsoal'
 Route::post('/hentikan-ujian-siswa', 'HasilController@hentikanUjianSiswa');
 Route::post('/hentikan-ujian-massal', 'HasilController@hentikanUjianMassal');
 Route::get('/publikasi-nilai/{id}', 'HasilController@publikasiNilai');
+Route::get('/bagikan-latihan/{id}', 'SoalController@bagikanLatihan');
+Route::post('/generate-token-ujian/{id}', 'SoalController@generateTokenUjian');
+Route::post('/hapus-token-ujian/{id}', 'SoalController@hapusTokenUjian');
 
 //Route::resource('siswa', 'SiswaController@index');
 Route::resource('siswa', 'SiswaController@index');
@@ -139,6 +142,8 @@ Route::post('/updateprofilfoto', 'SiswaController@updateprofilfoto');
 Route::get('soal-siswa', 'SiswaController@soal');
 Route::get('soal-siswa/{id}', 'SiswaController@detailsoal');
 Route::get('detail-ujian/{id}', 'SiswaController@detailujian');
+Route::get('/verifikasi-token/{id}', 'SiswaController@formTokenUjian');
+Route::post('/verifikasi-token/{id}', 'SiswaController@cekTokenUjian');
 
 Route::get('/ajax/halaman/soals', function(){
     $detailsoals = Detailsoal::join('soals', 'detailsoals.id_soal', '=', 'soals.id')

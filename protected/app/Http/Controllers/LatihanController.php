@@ -38,12 +38,38 @@ class LatihanController extends Controller
                       ->where(function($q) use ($id_kelas_siswa) {
                           $q->whereNull('materis.id_kelas')
                             ->orWhere('materis.id_kelas', '')
-                            ->orWhere('materis.id_kelas', $id_kelas_siswa);
+                            ->orWhereRaw("FIND_IN_SET(?, materis.id_kelas)", [$id_kelas_siswa]);
                       })
                       ->orderBy('materis.judul', 'ASC')
                       ->paginate(100);
 
-    return view('siswa.latihan.index', compact('materis', 'user', 'school'));
+    // Kumpulkan id materi yang bisa dilihat siswa ini (tanpa batas paginate)
+    $idMateriVisible = Materi::where('status', 'Y')
+                      ->where(function($q) use ($id_kelas_siswa) {
+                          $q->whereNull('id_kelas')
+                            ->orWhere('id_kelas', '')
+                            ->orWhereRaw("FIND_IN_SET(?, id_kelas)", [$id_kelas_siswa]);
+                      })
+                      ->lists('id');
+
+    // Daftar latihan (sudah dibagikan guru) yang BELUM dikerjakan siswa ini
+    $latihanBelumDikerjakan = collect();
+    if (count($idMateriVisible)) {
+      $latihanBelumDikerjakan = Soal::where('jenis', 2)
+                        ->where('status_bagikan', 'Y')
+                        ->whereIn('materi', $idMateriVisible)
+                        ->orderBy('id', 'desc')
+                        ->get()
+                        ->filter(function($soal) use ($user) {
+                          return !Jawab::where('id_soal', $soal->id)
+                                       ->where('id_user', $user->id)
+                                       ->where('status', 'Y')
+                                       ->exists();
+                        })
+                        ->values();
+    }
+
+    return view('siswa.latihan.index', compact('materis', 'user', 'school', 'latihanBelumDikerjakan'));
   }
 
   public function detail($id, $judul)
@@ -65,7 +91,7 @@ class LatihanController extends Controller
               ->first();
 
     if ($materi != "") {
-      $soals = Soal::where('jenis', 2)->where('materi', $materi->id)->get();
+      $soals = Soal::where('jenis', 2)->where('materi', $materi->id)->where('status_bagikan', 'Y')->get();
 
       // Tandai soal latihan mana saja yang sudah difinalisasi (dikerjakan) oleh siswa ini
       $idSoalSelesai = Jawab::where('id_user', $user->id)

@@ -95,6 +95,19 @@
     $sapaan = "Ibu";
   }
 ?>
+
+@if(session('info_bagikan'))
+  <div class="alert alert-success alert-dismissible" role="alert">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    {{ session('info_bagikan') }}
+  </div>
+@endif
+@if(session('info_token'))
+  <div class="alert alert-success alert-dismissible" role="alert">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    {{ session('info_token') }}
+  </div>
+@endif
 <div class="col-md-12 dash-left">
   <ol class="breadcrumb">
     <li><a href="{{ url('/guru') }}">Home</a></li>
@@ -315,14 +328,12 @@
         <table class="table table-bordered table-striped table-hover table-condensed" id="tabelsoal">
 	 <thead>
             <tr>
-              <th style="width: 50px">#</th>
               <th style="text-align: center;">ID <small>Soal</small></th>
-              <th>Materi</th>
+              <th style="width: 130px;">Materi</th>
               <th>Paket <small>Soal</small></th>
               <th>Deskripsi</th>
               <th>KKM</th>
               <th>Waktu</th>
-              <th>Tgl Dibuat</th>
               <th style="width: 90px; text-align: center;">Laporan</th>
               <th style="width: 160px; text-align: center;">Aksi</th>
             </tr>
@@ -334,9 +345,9 @@
             <?php
               // Kolom materi: tampil nama materi jika jenis latihan, kosong jika ujian
               if ($soal->jenis == 2 && $soal->nama_materi) {
-                $materi_label = "<span class='label label-info'>" . e($soal->nama_materi) . "</span>";
+                $materi_label = e($soal->nama_materi);
               } elseif ($soal->jenis == 2 && !$soal->nama_materi) {
-                $materi_label = "<span class='label label-warning'>Belum dipilih</span>";
+                $materi_label = "<span class='text-muted'>Belum dipilih</span>";
               } else {
                 $materi_label = "<span class='text-muted'>-</span>";
               }
@@ -347,16 +358,31 @@
               $tanggal = $tanggal[2].' '.$bulanpendek[$tanggal[1]].' '.$tanggal[0];
             ?>
             <tr>
-              <td>{{ $no++ }}</td>
               <td style="text-align: center;">{{ $soal->id }}</td>
-              <td>{!! $materi_label !!}</td>
+              <td style="font-size: 12px;">{!! $materi_label !!}</td>
               <td>{{ $soal->paket }}</td>
               <td>{{ $soal->deskripsi }}</td>
               <td>{{ $soal->kkm }}</td>
               <td>{{ $soal->waktu/60 }} menit</td>
-	      <td>{{ $tanggal }}</td>
               <td style="text-align: center;">
                 <a href="{{ url('/detail-hasil/'.$soal->id) }}" class="btn btn-xs btn-info" data-toggle='tooltip' title="Lihat Laporan Paket Soal"><i class="fa fa-bar-chart"></i> Laporan</a>
+                @if($soal->jenis == 2)
+                  <br>
+                  @if($soal->status_bagikan == 'Y')
+                    <a href="{{ url('/bagikan-latihan/'.$soal->id) }}" class="btn btn-xs btn-default" style="margin-top:4px;" onclick="return confirm('Tutup akses latihan ini? Siswa tidak akan bisa melihatnya lagi.');" data-toggle='tooltip' title="Klik untuk menutup akses siswa"><i class="fa fa-check-circle" style="color:#059669;"></i> Dibagikan</a>
+                  @else
+                    <a href="{{ url('/bagikan-latihan/'.$soal->id) }}" class="btn btn-xs btn-warning" style="margin-top:4px;" onclick="return confirm('Bagikan latihan ini ke siswa sekarang?');" data-toggle='tooltip' title="Latihan belum bisa dilihat siswa"><i class="fa fa-share-alt"></i> Bagikan Latihan</a>
+                  @endif
+                @else
+                  <br>
+                  @if($soal->token_ujian)
+                    <span class="label label-default" style="display:inline-block; margin-top:4px; font-size:11px;" data-toggle="tooltip" title="Token aktif untuk ujian ini">🔒 {{ $soal->token_ujian }}</span><br>
+                    <a href="#" class="btn btn-xs btn-warning btn-generate-token" data-id="{{ $soal->id }}" style="margin-top:3px;">Ubah Token</a>
+                    <a href="#" class="btn btn-xs btn-default btn-hapus-token" data-id="{{ $soal->id }}" style="margin-top:3px;">Buka Kunci</a>
+                  @else
+                    <a href="#" class="btn btn-xs btn-primary btn-generate-token" data-id="{{ $soal->id }}" style="margin-top:4px;"><i class="fa fa-lock"></i> Aktifkan Token</a>
+                  @endif
+                @endif
               </td>
               <td style="text-align: center;">
                 <a href="{{ url('/edit-soal/'.$soal->id) }}" class="btn btn-xs btn-success" data-toggle='tooltip' title="Ubah Soal"><i class="fa fa-pencil-square-o"></i></a>
@@ -367,7 +393,7 @@
             </tr>
             @endforeach
             @else
-            <tr><td colspan="10" class="alert alert-danger">Belum ada data untuk ditampilkan.</td></tr>
+            <tr><td colspan="8" class="alert alert-danger">Belum ada data untuk ditampilkan.</td></tr>
             @endif
           </tbody>
         </table>
@@ -383,6 +409,28 @@
       'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
     }
   });
+  
+  $(".btn-generate-token").click(function(e){
+  e.preventDefault();
+  if (!confirm('Buat/ubah token untuk ujian ini? Token lama (jika ada) tidak akan berlaku lagi.')) return false;
+  var id = $(this).data('id');
+  $.ajax({
+    type: "POST",
+    url: "{{ url('/generate-token-ujian') }}/"+id,
+    success: function(){ location.reload(); }
+  });
+});
+$(".btn-hapus-token").click(function(e){
+  e.preventDefault();
+  if (!confirm('Buka kunci ujian ini? Siswa akan bisa langsung masuk tanpa token.')) return false;
+  var id = $(this).data('id');
+  $.ajax({
+    type: "POST",
+    url: "{{ url('/hapus-token-ujian') }}/"+id,
+    success: function(){ location.reload(); }
+  });
+});
+
   $(document).ready(function() {
     $("#q").keyup(function(e){
       if(e.keyCode == 13)

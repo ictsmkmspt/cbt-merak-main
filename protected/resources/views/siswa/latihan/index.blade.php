@@ -65,6 +65,46 @@
 }
 </style>
 
+@if(session('info_soal_kosong'))
+<div class="alert alert-warning" style="margin-bottom: 14px;">
+  <i class="fa fa-exclamation-triangle"></i> {{ session('info_soal_kosong') }}
+</div>
+@endif
+
+@if($latihanBelumDikerjakan->count())
+<style>
+.todo-panel {
+  background: #fff; border-radius: 18px; border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 14px rgba(30,58,138,.06);
+  padding: 20px 22px; margin-bottom: 22px;
+}
+.todo-title { font-size: 14px; font-weight: 700; color: #1e3a8a; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.todo-count { background: #dbeafe; color: #1e3a8a; font-size: 11px; font-weight: 700; border-radius: 20px; padding: 2px 10px; }
+.todo-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; border-bottom: 1px solid #f1f5f9;
+}
+.todo-item:last-child { border-bottom: none; }
+.todo-item-name { font-size: 13px; font-weight: 600; color: #1e3a8a; }
+.todo-item-name a { color: #1e3a8a; text-decoration: none; }
+.todo-item-name a:hover { color: #1d4ed8; }
+.todo-btn {
+  background: #dbeafe; color: #1e3a8a !important; font-size: 11.5px; font-weight: 700;
+  border-radius: 8px; padding: 6px 14px; text-decoration: none !important; white-space: nowrap;
+}
+.todo-btn:hover { background: #bfdbfe; }
+</style>
+<div class="todo-panel">
+  <div class="todo-title">📝 Latihan belum dikerjakan <span class="todo-count">{{ $latihanBelumDikerjakan->count() }}</span></div>
+  @foreach($latihanBelumDikerjakan as $lat)
+    <div class="todo-item">
+      <div class="todo-item-name"><a href="{{ url('/soal-siswa/'.$lat->id) }}">{{ $lat->paket }}</a></div>
+      <a href="{{ url('/soal-siswa/'.$lat->id) }}" class="todo-btn">Kerjakan</a>
+    </div>
+  @endforeach
+</div>
+@endif
+
 <div class="latihan-grid">
   @if($materis->count())
   @foreach($materis as $materi)
